@@ -7,6 +7,7 @@ import time as timer
 time_start = timer.time()
 ROOT.gInterpreter.AddIncludePath('/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/lib')
 ROOT.gInterpreter.Declare('#include "basic_sel.h"')
+ROOT.gInterpreter.Declare('#include "GetPFTrk.h"')
 ROOT.gSystem.Load('/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/lib/RDFfunc.so')
 ROOT.EnableImplicitMT();
 
@@ -173,9 +174,8 @@ print ("Before selection total entries", nentries)
 
 df_var = df.Define("emuindex","Getemuindex(nLepCand,LepCand_id, LepCand_dz)").Define("eleindex","emuindex[0]").Define("muindex","emuindex[1]")
 
-df_var = df_var.Define("my_ele","GetLepVector(eleindex,LepCand_pt,LepCand_eta,LepCand_phi)")
-
-df_var = df_var.Define("my_mu","GetLepVector(muindex,LepCand_pt,LepCand_eta,LepCand_phi)")\
+df_var = df_var.Define("my_ele","GetLepVector(eleindex,LepCand_pt,LepCand_eta,LepCand_phi)")\
+    .Define("my_mu","GetLepVector(muindex,LepCand_pt,LepCand_eta,LepCand_phi)")\
     .Define("elept","my_ele.Pt()").Define("eleeta","my_ele.Eta()").Define("elephi","my_ele.Phi()").Define("eledz","LepCand_dz[eleindex]")\
     .Define("mupt","my_mu.Pt()").Define("mueta","my_mu.Eta()").Define("muphi","my_mu.Phi()").Define("mudz","LepCand_dz[muindex]")\
     .Define("isOS","GetisOS(LepCand_charge,eleindex,muindex)")
@@ -185,6 +185,33 @@ df_sel = df_var.Filter("fabs(eleeta)<2.4 && fabs(mueta)<2.4").Filter("LepCand_mu
 
 
 
+#Add information of mass (mvis>40, transverse mass, collinear mass), acoplanarity
+df_var = df_sel.Define("mvis","(my_ele+my_mu).M()")\
+    .Define("mumtrans","GetTransmass(my_mu, MET_pt, MET_phi)")\
+    .Define("elemtrans","GetTransmass(my_ele, MET_pt, MET_phi)")\
+    .Define("mcol","GetCollMass(my_ele, my_mu, MET_pt, MET_phi)").Define("Acopl","GetAcopl(my_ele,my_mu)")\
+    .Define("x1","Getx1(my_ele, my_mu, MET_pt, MET_phi)")\
+    .Define("x2","Getx2(my_ele, my_mu, MET_pt, MET_phi)")\
+    .Define("sumM","GetsumM(my_ele, my_mu, MET_pt, MET_phi)")
+df_sel = df_var.Filter("mvis>40")
+
+#Define vtx with 3 definition (simple average, theta-average, pt-average),dzemu<0.1
+df_addvtx = df_sel.Define("zvtxll1","recovtxz1(eledz, mudz,PV_z)")\
+    .Define("zvtxll2","recovtxz2(my_ele, my_mu, eledz, mudz, PV_z)")\
+    .Define("zvtxll3","recovtxz3(elept, mupt, eledz, mudz, PV_z)")\
+    .Filter("fabs(eledz-mudz)<0.1")
+
+df = df_addvtx.Define("genAco","-99.0").Define("Acoweight","1.0")
+
+
+
+
+df = df.Define("Track_eleptdiff","Computediffpt_lep(Track_pt, elept)")\
+    .Define("Track_eledeltaR","ComputedeltaR_lep(Track_eta, Track_phi, eleeta, elephi)")\
+    .Define("Track_muptdiff","Computediffpt_lep(Track_pt, mupt)")\
+    .Define("Track_mudeltaR","ComputedeltaR_lep(Track_eta, Track_phi, mueta, muphi)")\
+    .Define("Track_elematch","Gettrkmatch(Track_eleptdiff,Track_eledeltaR)")\
+    .Define("Track_mumatch","Gettrkmatch(Track_muptdiff,Track_mudeltaR)")
 
 
 
@@ -193,38 +220,21 @@ df_sel = df_var.Filter("fabs(eleeta)<2.4 && fabs(mueta)<2.4").Filter("LepCand_mu
 
 
 
-
-
-#df = df.Filter("fabs(LepCand_eta[0])<2.4&&fabs(LepCand_eta[1]<2.4)").Filter("(LepCand_pt[0]>15&&LepCand_pt[1]>24)||(LepCand_pt[0]>24&&LepCand_pt[1]>15)").Filter("LepCand_charge[0]*LepCand_charge[1]<0")
-
-#df = df.Define("LV_1","GetLepVector(0,LepCand_pt,LepCand_eta,LepCand_phi)").Define("LV_2","GetLepVector(1,LepCand_pt,LepCand_eta,LepCand_phi)")
-
-#df = df.Define("m_emu","(LV_1+LV_2).M()");
-#df = df.Define("pt_emu","(LV_1+LV_2).Pt()")
-
-#df = df.Filter("m_emu>40").Filter("pt_emu>10").Filter("LV_1.DeltaR(LV_2)>=0.5")
 
 columns = ROOT.std.vector("string")()
 
-'''
-if ("Ctb" in sample):
-    df = df.Define("weight_Ctb","Getweight_Ctb(TauG2Weights_ceBRe_0p0)")
-    for c in ("run","luminosityBlock","m_emu","pt_emu","weight_Ctb"):
-        columns.push_back(c)
-else:
-    for c in ("run","luminosityBlock","m_emu","pt_emu"):
-        columns.push_back(c)
-'''
+
 for c in ("run","luminosityBlock","event","emuindex",\
     "my_ele","elept","eleeta","elephi","eledz",\
     "my_mu","mupt","mueta","muphi","mudz",\
-    "isOS"
+    "isOS","mvis","mumtrans","elemtrans","mcol","Acopl",\
+    "zvtxll1","zvtxll2","zvtxll3","genAco","Acoweight",\
+    "MET_pt","MET_phi","x1","x2","sumM"
 ):
     columns.push_back(c)
 
 if ("Ctb" in sample):
-    df_sel = df_sel.Define("weight_Ctb","Getweight_Ctb(TauG2Weights_ceBRe_0p0)")
-    columns.push_back("weight_Ctb")
+    columns.push_back("TauG2Weights_ceBRe_0p0")
 
 
 
@@ -232,9 +242,11 @@ if ("Ctb" in sample):
 
 
 
-df_sel.Snapshot("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
 
-nentries = df_sel.Count().GetValue()
+
+df.Snapshot("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
+
+nentries = df.Count().GetValue()
 print("After selection entries", nentries)
 
 time_end = timer.time()

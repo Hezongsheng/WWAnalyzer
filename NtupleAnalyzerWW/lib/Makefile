@@ -2,10 +2,12 @@
 
 PROGRAM = RDFfunc
 
-HDRS = basic_sel.h 
+HDRS = 	basic_sel.h \
+		GetPFTrk.h
 
-OBJS = basic_sel.o \
+OBJS = basic_sel.o GetPFTrk.o\
 	dict_$(PROGRAM).o
+
 
 #-------------------------------------------------------
 ObjSuf = o

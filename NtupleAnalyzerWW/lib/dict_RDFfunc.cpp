@@ -36,6 +36,7 @@
 
 // Header files passed as explicit arguments
 #include "basic_sel.h"
+#include "GetPFTrk.h"
 
 // Header files passed via #pragma extra_include
 
@@ -178,6 +179,7 @@ namespace {
   void TriggerDictionaryInitialization_dict_RDFfunc_Impl() {
     static const char* headers[] = {
 "basic_sel.h",
+"GetPFTrk.h",
 nullptr
     };
     static const char* includePaths[] = {
@@ -201,6 +203,7 @@ class __attribute__((annotate("$clingAutoload$basic_sel.h")))  Getxsw_W;
 #define _BACKWARD_BACKWARD_WARNING_H
 // Inline headers
 #include "basic_sel.h"
+#include "GetPFTrk.h"
 
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
