@@ -100,57 +100,6 @@ float GetCollMass(TLorentzVector my_lep1, TLorentzVector my_lep2, float MET_pt, 
     return m_mz_coll;
 }
 
-//calculate collinear mass in z direction
-float Getx1(TLorentzVector my_lep1, TLorentzVector my_lep2, float MET_pt, float MET_phi){
-    float metx = MET_pt * cos(MET_phi);
-    float mety = MET_pt * sin(MET_phi) ;
-    float m_mz_coll = 0;
-    float x1 = ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px())) / ((my_lep1.Px()*my_lep2.Py())-(my_lep1.Py()*my_lep2.Px()) + (my_lep2.Py()*metx) - (my_lep2.Px()*mety));
-    float x2 = ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px())) / ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px()) + (my_lep1.Px()*metx) - (my_lep1.Py()*metx));
-    if ((x1*x2) > 0.){
-        m_mz_coll = ((my_lep1+my_lep2).M()) / (sqrt(x1*x2));
-    }
-    return x1;
-}
-
-
-
-//calculate collinear mass in z direction
-float Getx2(TLorentzVector my_lep1, TLorentzVector my_lep2, float MET_pt, float MET_phi){
-    float metx = MET_pt * cos(MET_phi);
-    float mety = MET_pt * sin(MET_phi) ;
-    float m_mz_coll = 0;
-    float x1 = ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px())) / ((my_lep1.Px()*my_lep2.Py())-(my_lep1.Py()*my_lep2.Px()) + (my_lep2.Py()*metx) - (my_lep2.Px()*mety));
-    float x2 = ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px())) / ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px()) + (my_lep1.Px()*metx) - (my_lep1.Py()*metx));
-    if ((x1*x2) > 0.){
-        m_mz_coll = ((my_lep1+my_lep2).M()) / (sqrt(x1*x2));
-    }
-    return x2;
-}
-
-//calculate collinear mass in z direction
-float GetsumM(TLorentzVector my_lep1, TLorentzVector my_lep2, float MET_pt, float MET_phi){
-    float metx = MET_pt * cos(MET_phi);
-    float mety = MET_pt * sin(MET_phi) ;
-    float m_mz_coll = 0;
-    float x1 = ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px())) / ((my_lep1.Px()*my_lep2.Py())-(my_lep1.Py()*my_lep2.Px()) + (my_lep2.Py()*metx) - (my_lep2.Px()*mety));
-    float x2 = ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px())) / ((my_lep1.Px()*my_lep2.Py()) - (my_lep1.Py()*my_lep2.Px()) + (my_lep1.Px()*metx) - (my_lep1.Py()*metx));
-    if ((x1*x2) > 0.){
-        m_mz_coll = ((my_lep1+my_lep2).M()) / (sqrt(x1*x2));
-    }
-    return (my_lep1+my_lep2).M();
-}
-
-
-
-
-
-
-
-
-
-
-
 
 //calculate acoplanarity
 float GetAcopl(TLorentzVector my_lep1, TLorentzVector my_lep2){

@@ -229,7 +229,7 @@ for c in ("run","luminosityBlock","event","emuindex",\
     "my_mu","mupt","mueta","muphi","mudz",\
     "isOS","mvis","mumtrans","elemtrans","mcol","Acopl",\
     "zvtxll1","zvtxll2","zvtxll3","genAco","Acoweight",\
-    "MET_pt","MET_phi","x1","x2","sumM"
+    "MET_pt","MET_phi"
 ):
     columns.push_back(c)
 

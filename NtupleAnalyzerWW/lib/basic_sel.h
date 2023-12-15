@@ -46,14 +46,6 @@ float GetTransmass(TLorentzVector my_lep, float MET_pt, float MET_phi);
 
 float GetCollMass(TLorentzVector my_lep1, TLorentzVector my_lep2, float MET_pt, float MET_phi);
 
-float Getx1(TLorentzVector my_lep1, TLorentzVector my_lep2, float MET_pt, float MET_phi);
-
-float Getx2(TLorentzVector my_lep1, TLorentzVector my_lep2, float MET_pt, float MET_phi);
-
-float GetsumM(TLorentzVector my_lep1, TLorentzVector my_lep2, float MET_pt, float MET_phi);
-
-
-
 float GetAcopl(TLorentzVector my_lep1, TLorentzVector my_lep2);
 
 float recovtxz1(float lep1dz, float lep2dz, float PV_z);
