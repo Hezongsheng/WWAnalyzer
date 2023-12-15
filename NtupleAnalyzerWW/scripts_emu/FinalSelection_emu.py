@@ -189,10 +189,7 @@ df_sel = df_var.Filter("fabs(eleeta)<2.4 && fabs(mueta)<2.4").Filter("LepCand_mu
 df_var = df_sel.Define("mvis","(my_ele+my_mu).M()")\
     .Define("mumtrans","GetTransmass(my_mu, MET_pt, MET_phi)")\
     .Define("elemtrans","GetTransmass(my_ele, MET_pt, MET_phi)")\
-    .Define("mcol","GetCollMass(my_ele, my_mu, MET_pt, MET_phi)").Define("Acopl","GetAcopl(my_ele,my_mu)")\
-    .Define("x1","Getx1(my_ele, my_mu, MET_pt, MET_phi)")\
-    .Define("x2","Getx2(my_ele, my_mu, MET_pt, MET_phi)")\
-    .Define("sumM","GetsumM(my_ele, my_mu, MET_pt, MET_phi)")
+    .Define("mcol","GetCollMass(my_ele, my_mu, MET_pt, MET_phi)").Define("Acopl","GetAcopl(my_ele,my_mu)")
 df_sel = df_var.Filter("mvis>40")
 
 #Define vtx with 3 definition (simple average, theta-average, pt-average),dzemu<0.1
