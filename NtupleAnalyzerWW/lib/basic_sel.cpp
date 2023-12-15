@@ -73,6 +73,62 @@ ROOT::RVec<int> Getemuindex(int nLepCand, ROOT::VecOps::RVec<int> &LepCand_id, R
     return emuindex;
 }
 
+
+/*
+//For mumu final state get mumu index
+ROOT::RVec<int> Getmumuindex(int nLepCand, ROOT::VecOps::RVec<float> &LepCand_dz){
+    int mu1index = 0;
+    int mu2index = 0;
+    if (nLepCand==2){
+        mu1index = 0;
+        mu2index = 1;
+    }
+    else{
+        ROOT::VecOps::RVec<float> LepCand_Dz_sort = Sort(LepCand_dz);
+        float mu1dz = LepCand_Dz_sort[0];
+        float mu2dz = LepCand_Dz_sort[1];
+        float dzdiff_min = mu2dz - mu1dz;
+        for (int i = 2; i < int(LepCand_dz.size()); i++){
+            if ((LepCand_Dz_sort[i] - LepCand_Dz_sort[i-1]) < dzdiff_min){
+                mu1dz = LepCand_Dz_sort[i-1];
+                mu2dz = LepCand_Dz_sort[i];
+                dzdiff_min = mu2dz - mu1dz;
+            }
+        }
+        mu1index = std::distance(LepCand_dz.begin(),find(LepCand_dz.begin(),LepCand_dz.end(),mu1dz));
+        mu2index = std::instance(LepCand_dz.begin(),find(LepCand_dz.begin(),LepCand_dz.end(),mu2dz));
+        if (mu1index > mu2index){
+            int c = mu1index;
+            mu1index = mu2index;
+            mu2index = c;
+        }
+    }
+    ROOT::RVec<int> mumuindex = {mu1index, mu2index};
+    return mumuindex;
+}
+*/
+
+
+//For mumu final state get mumu index
+ROOT::RVec<int> Getmumuindex(int nLepCand, ROOT::VecOps::RVec<int> LepCand_id, ROOT::VecOps::RVec<float> &LepCand_dz){
+    int mu1index = 0;
+    int mu2index = 1;
+    if (nLepCand != 2){
+        ROOT::VecOps::RVec<int> indices;
+        for (int i = 0; i < int(LepCand_id.size()); i++){
+            if (LepCand_id[i] == 13){
+                indices.push_back(i);
+            }
+        }
+        mu1index = Min(indices);
+        mu2index = Max(indices);
+    }
+    ROOT::RVec<int> mumuindex = {mu1index, mu2index};
+    return mumuindex;
+}
+
+
+
 bool GetisOS(ROOT::VecOps::RVec<Int_t> &LepCand_charge, int lep1index, int lep2index){
     if (LepCand_charge[lep1index]*LepCand_charge[lep2index]<0)
         return true;

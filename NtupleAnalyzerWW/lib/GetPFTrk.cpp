@@ -48,6 +48,7 @@ ROOT::RVec<float> ComputedeltaR_lep(Vec_t PF_eta, Vec_t PF_phi, float lep_eta, f
     return deltaR_lep;
 }
 
+
 ROOT::RVec<float> Compute_ditaudz(Vec_t trk_dz, float PV_z, float zvtxll){
     auto mod = [PV_z, zvtxll](float dz){
         float ditaudz = dz+PV_z-zvtxll;
@@ -58,7 +59,7 @@ ROOT::RVec<float> Compute_ditaudz(Vec_t trk_dz, float PV_z, float zvtxll){
 }
 
 
-//To get known whether the trk is from lep
+//To get known whether the trk is from lep, if the trk is from lep, return true
 ROOT::RVec<bool> Gettrkmatch(Vec_t Track_lepptdiff, Vec_t Track_lepdeltaR){
     auto mod = [](float PF_lepptdiff, float PF_lepdeltaR){
         bool match = false;
@@ -72,7 +73,7 @@ ROOT::RVec<bool> Gettrkmatch(Vec_t Track_lepptdiff, Vec_t Track_lepdeltaR){
 }
 
 
-//To get known whether the trk is from ele or mu
+//To get known whether the trk is from ele or mu, if the trk is not from ele nor mu, return 1
 ROOT::RVec<int> Getntrkcut_emu(Vec_t ChargedPFCandidates_pt, Vec_t ChargedPFCandidates_eta, Vec_t ChargedPFCandidates_phi, Vec_t ChargedPFCandidates_dz,\
     Vec_t FinalEletrk_pt, Vec_t FinalEletrk_eta, Vec_t FinalEletrk_phi, Vec_t FinalEletrk_dz,\
     Vec_t FinalMuontrk_pt, Vec_t FinalMuontrk_eta, Vec_t FinalMuontrk_phi, Vec_t FinalMuontrk_dz){
@@ -109,7 +110,7 @@ ROOT::RVec<int> Getntrkcut_emu(Vec_t ChargedPFCandidates_pt, Vec_t ChargedPFCand
 
 
 
-//To get known whether the trk is from mu or mu
+//To get known whether the trk is from mu or mu, if the trk is not from mu, return 1
 ROOT::RVec<int> Getntrkcut_mumu(Vec_t ChargedPFCandidates_pt, Vec_t ChargedPFCandidates_eta, Vec_t ChargedPFCandidates_phi, Vec_t ChargedPFCandidates_dz,\
     Vec_t FinalMuontrk_pt, Vec_t FinalMuontrk_eta, Vec_t FinalMuontrk_phi, Vec_t FinalMuontrk_dz){
         auto mod = [FinalMuontrk_pt, FinalMuontrk_eta, FinalMuontrk_phi, FinalMuontrk_dz](float PF_pt, float PF_eta, float PF_phi, float PF_dz){
@@ -132,3 +133,4 @@ ROOT::RVec<int> Getntrkcut_mumu(Vec_t ChargedPFCandidates_pt, Vec_t ChargedPFCan
     ROOT::RVec<int> cut_excludemumu = Map(ChargedPFCandidates_pt, ChargedPFCandidates_eta, ChargedPFCandidates_phi, ChargedPFCandidates_dz, mod);
     return cut_excludemumu;    
 }
+
