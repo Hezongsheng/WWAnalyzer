@@ -3,9 +3,10 @@
 PROGRAM = RDFfunc
 
 HDRS = 	basic_sel.h \
-		GetPFTrk.h
+		GetPFTrk.h\
+		Correction.h
 
-OBJS = basic_sel.o GetPFTrk.o\
+OBJS = basic_sel.o GetPFTrk.o Correction.o\
 	dict_$(PROGRAM).o
 
 

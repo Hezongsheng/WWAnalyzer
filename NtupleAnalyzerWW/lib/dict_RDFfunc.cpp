@@ -37,6 +37,7 @@
 // Header files passed as explicit arguments
 #include "basic_sel.h"
 #include "GetPFTrk.h"
+#include "Correction.h"
 
 // Header files passed via #pragma extra_include
 
@@ -134,6 +135,51 @@ namespace ROOT {
 } // end of namespace ROOT
 
 namespace ROOT {
+   static TClass *spe_cor_Dictionary();
+   static void spe_cor_TClassManip(TClass*);
+   static void *new_spe_cor(void *p = nullptr);
+   static void *newArray_spe_cor(Long_t size, void *p);
+   static void delete_spe_cor(void *p);
+   static void deleteArray_spe_cor(void *p);
+   static void destruct_spe_cor(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::spe_cor*)
+   {
+      ::spe_cor *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::spe_cor));
+      static ::ROOT::TGenericClassInfo 
+         instance("spe_cor", "Correction.h", 20,
+                  typeid(::spe_cor), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &spe_cor_Dictionary, isa_proxy, 0,
+                  sizeof(::spe_cor) );
+      instance.SetNew(&new_spe_cor);
+      instance.SetNewArray(&newArray_spe_cor);
+      instance.SetDelete(&delete_spe_cor);
+      instance.SetDeleteArray(&deleteArray_spe_cor);
+      instance.SetDestructor(&destruct_spe_cor);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::spe_cor*)
+   {
+      return GenerateInitInstanceLocal((::spe_cor*)nullptr);
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal((const ::spe_cor*)nullptr); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *spe_cor_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const ::spe_cor*)nullptr)->GetClass();
+      spe_cor_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void spe_cor_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
    // Wrappers around operator new
    static void *new_musf(void *p) {
       return  p ? new(p) ::musf : new ::musf;
@@ -175,11 +221,33 @@ namespace ROOT {
    }
 } // end of namespace ROOT for class ::Getxsw_W
 
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_spe_cor(void *p) {
+      return  p ? new(p) ::spe_cor : new ::spe_cor;
+   }
+   static void *newArray_spe_cor(Long_t nElements, void *p) {
+      return p ? new(p) ::spe_cor[nElements] : new ::spe_cor[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_spe_cor(void *p) {
+      delete ((::spe_cor*)p);
+   }
+   static void deleteArray_spe_cor(void *p) {
+      delete [] ((::spe_cor*)p);
+   }
+   static void destruct_spe_cor(void *p) {
+      typedef ::spe_cor current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class ::spe_cor
+
 namespace {
   void TriggerDictionaryInitialization_dict_RDFfunc_Impl() {
     static const char* headers[] = {
 "basic_sel.h",
 "GetPFTrk.h",
+"Correction.h",
 nullptr
     };
     static const char* includePaths[] = {
@@ -195,6 +263,7 @@ nullptr
 extern int __Cling_AutoLoading_Map;
 class __attribute__((annotate("$clingAutoload$basic_sel.h")))  musf;
 class __attribute__((annotate("$clingAutoload$basic_sel.h")))  Getxsw_W;
+class __attribute__((annotate("$clingAutoload$Correction.h")))  spe_cor;
 )DICTFWDDCLS";
     static const char* payloadCode = R"DICTPAYLOAD(
 #line 1 "dict_RDFfunc dictionary payload"
@@ -204,12 +273,14 @@ class __attribute__((annotate("$clingAutoload$basic_sel.h")))  Getxsw_W;
 // Inline headers
 #include "basic_sel.h"
 #include "GetPFTrk.h"
+#include "Correction.h"
 
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
     static const char* classesHeaders[] = {
 "Getxsw_W", payloadCode, "@",
 "musf", payloadCode, "@",
+"spe_cor", payloadCode, "@",
 nullptr
 };
     static bool isInitialized = false;
