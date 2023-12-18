@@ -8,6 +8,7 @@ time_start = timer.time()
 ROOT.gInterpreter.AddIncludePath('/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/lib')
 ROOT.gInterpreter.Declare('#include "basic_sel.h"')
 ROOT.gInterpreter.Declare('#include "GetPFTrk.h"')
+ROOT.gInterpreter.Declare('#include "Correction.h"')
 ROOT.gSystem.Load('/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/lib/RDFfunc.so')
 ROOT.EnableImplicitMT();
 
@@ -178,10 +179,16 @@ df_var = df_var.Define("my_ele","GetLepVector(eleindex,LepCand_pt,LepCand_eta,Le
     .Define("my_mu","GetLepVector(muindex,LepCand_pt,LepCand_eta,LepCand_phi)")\
     .Define("elept","my_ele.Pt()").Define("eleeta","my_ele.Eta()").Define("elephi","my_ele.Phi()").Define("eledz","LepCand_dz[eleindex]")\
     .Define("mupt","my_mu.Pt()").Define("mueta","my_mu.Eta()").Define("muphi","my_mu.Phi()").Define("mudz","LepCand_dz[muindex]")\
-    .Define("isOS","GetisOS(LepCand_charge,eleindex,muindex)")
+    .Define("isOS","GetisOS(LepCand_charge,eleindex,muindex)").Define("ptemu","(my_mu+my_ele).Pt()")
 
 df_sel = df_var.Filter("fabs(eleeta)<2.4 && fabs(mueta)<2.4").Filter("LepCand_muonMediumId[muindex]==1 && LepCand_muonIso[muindex]<0.20")\
     .Filter("my_ele.DeltaR(my_mu)>=0.5")
+
+
+if (sample=="DY" or sample=="GGToTauTau_Ctb20" or sample=="GGToTauTau"):
+    df_sel = df_sel.Filter("nGenCand==2").Define("my_gen0","GetLepVector(0, GenCand_pt, GenCand_eta, GenCand_phi)").Define("my_gen1","GetLepVector(1, GenCand_pt, GenCand_eta, GenCand_phi)")\
+        .Define("DRmatch1","my_ele.DeltaR(my_gen0) + my_mu.DeltaR(my_gen1)").Define("DRmatch2","my_ele.DeltaR(my_gen1) + my_mu.DeltaR(my_gen0)")\
+        .Filter("DRmatch1 < 0.2 || DRmatch2 < 0.2")
 
 
 
@@ -198,17 +205,66 @@ df_addvtx = df_sel.Define("zvtxll1","recovtxz1(eledz, mudz,PV_z)")\
     .Define("zvtxll3","recovtxz3(elept, mupt, eledz, mudz, PV_z)")\
     .Filter("fabs(eledz-mudz)<0.1")
 
-df = df_addvtx.Define("genAco","-99.0").Define("Acoweight","1.0")
+#Acoplanarity weights only for DY samples
+if (isdata):
+    df = df_addvtx.Define("genAco","-99.0").Define("Acoweight","1.0").Define("puWeight","1.0").Define("puWeightUp","1.0").Define("puWeightDown","1.0")
+else:
+    if sample=="DY":
+        df = df_addvtx.Define("genAco","GetGenAco(nGenCand, GenCand_phi, Acopl)").Define("Acoweight","Get_Aweight(genAco, nGenCand, GenCand_pt, elept, mupt, \"{}\")".format(year))
+    else:
+        df = df_addvtx.Define("genAco","-99.0").Define("Acoweight","1.0")
 
 
 
-
+#make new eletrack and mutrack collection
 df = df.Define("Track_eleptdiff","Computediffpt_lep(Track_pt, elept)")\
     .Define("Track_eledeltaR","ComputedeltaR_lep(Track_eta, Track_phi, eleeta, elephi)")\
     .Define("Track_muptdiff","Computediffpt_lep(Track_pt, mupt)")\
     .Define("Track_mudeltaR","ComputedeltaR_lep(Track_eta, Track_phi, mueta, muphi)")\
     .Define("Track_elematch","Gettrkmatch(Track_eleptdiff,Track_eledeltaR)")\
     .Define("Track_mumatch","Gettrkmatch(Track_muptdiff,Track_mudeltaR)")
+
+#Get ditaudz(putrk need to add BS correction and ditaudz is the trk distance to ditau vertex)
+print("Calculate ditaudz")
+if (isdata):
+    df = df.Define("Track_ditaudz","Compute_ditaudz(Track_dz,PV_z,zvtxll1)")
+else:
+    df = df.Define("Track_ditaudz","Compute_ditaudz(Track_dz, PV_z, zvtxll1)")
+
+df = df.Define("Trkcut","Track_ditaudz<0.05 && (!Track_elematch) && (!Track_mumatch) && (Track_pt > 0.5) && abs(Track_eta) < 2.5")\
+    .Define("nTrk","Sum(Trkcut)")\
+    .Define("Trk_pt","Track_pt[Trkcut]")\
+    .Define("Trk_eta","Track_eta[Trkcut]")\
+    .Define("Trk_phi","Track_phi[Trkcut]")\
+    .Define("Trk_dz","Track_dz[Trkcut]")\
+    .Define("Trk_ditaudz","Track_ditaudz[Trkcut]")
+
+
+#Apply nputrack correction
+print("Apply nputrack correctionz")
+if (isdata):
+    df = df.Define("nPUtrk","0")\
+    .Define("nPUtrkweight","1.0")
+else:
+    df = df.Define("PUtrkcut","Track_isMatchedToHS==0")\
+        .Define("nPUtrk","Sum(PUtrkcut)")\
+        .Define("nPUtrkweight","Get_ntpuweight(nPUtrk, zvtxll1, \"{}\")".format(year))
+
+#Apply nHStrk correction (only for DY)
+print("Apply nHStrack correctionz")
+if (isdata):
+    df = df.Define("nHStrk","0")\
+        .Define("nHStrkweight","1.0")
+else:
+    if (sample=="DY"):
+        df = df.Define("HStrkcut","Track_isMatchedToHS==1")\
+            .Define("nHStrk","Sum(HStrkcut)")\
+            .Define("nHStrkweight","Get_ntHSweight(nHStrk,genAco,\"{}\")".format(year))
+    else:
+        df = df.Define("HStrkcut","Track_isMatchedToHS==1")\
+            .Define("nHStrk","Sum(HStrkcut)")\
+            .Define("nHStrkweight","1.0")
+
 
 
 
@@ -224,14 +280,23 @@ columns = ROOT.std.vector("string")()
 for c in ("run","luminosityBlock","event","emuindex",\
     "my_ele","elept","eleeta","elephi","eledz",\
     "my_mu","mupt","mueta","muphi","mudz",\
-    "isOS","mvis","mumtrans","elemtrans","mcol","Acopl",\
+    "ptemu","isOS","mvis","mumtrans","elemtrans","mcol","Acopl",\
     "zvtxll1","zvtxll2","zvtxll3","genAco","Acoweight",\
-    "MET_pt","MET_phi"
+    "MET_pt","MET_phi",\
+    "nGenCand","GenCand_id","GenCand_pt","GenCand_eta","GenCand_phi",\
+    "puWeight","puWeightUp","puWeightDown",\
+    "nTrk","nPUtrk","nHStrk","nPUtrkweight","nHStrkweight"
 ):
     columns.push_back(c)
 
 if ("Ctb" in sample):
     columns.push_back("TauG2Weights_ceBRe_0p0")
+
+if (sample=="DY" or sample=="GGToTauTau_Ctb20" or sample=="GGToTauTau"):
+    columns.push_back("my_gen0")
+    columns.push_back("my_gen1")
+    columns.push_back("DRmatch1")
+    columns.push_back("DRmatch2")
 
 
 
