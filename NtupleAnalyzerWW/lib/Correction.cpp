@@ -120,19 +120,6 @@ map<string, spe_cor> spe_cormap = {
 };
 
 
-//Get Correction on Acopolanarity only for DY
-/*TFile* f_aco_fine=new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/corrections/correction_acoplanarity_fine_2018.root","read");
-TF1* fit_aco_2030_2030 = (TF1*) f_aco_fine->Get("fit_acoplanarity_2030_2030");
-TF1* fit_aco_3040_2030 = (TF1*) f_aco_fine->Get("fit_acoplanarity_3040_2030");
-TF1* fit_aco_4050_2030 = (TF1*) f_aco_fine->Get("fit_acoplanarity_4050_2030");
-TF1* fit_aco_gt50_2030 = (TF1*) f_aco_fine->Get("fit_acoplanarity_gt50_2030");
-TF1* fit_aco_3040_3040 = (TF1*) f_aco_fine->Get("fit_acoplanarity_3040_3040");
-TF1* fit_aco_4050_3040 = (TF1*) f_aco_fine->Get("fit_acoplanarity_4050_3040");
-TF1* fit_aco_gt50_3040 = (TF1*) f_aco_fine->Get("fit_acoplanarity_gt50_3040");
-TF1* fit_aco_4050_4050 = (TF1*) f_aco_fine->Get("fit_acoplanarity_4050_4050");
-TF1* fit_aco_gt50_4050 = (TF1*) f_aco_fine->Get("fit_acoplanarity_gt50_4050");
-TF1* fit_aco_gt50_gt50 = (TF1*) f_aco_fine->Get("fit_acoplanarity_gt50_gt50");
-*/
 float GetGenAco(int nZGenCand, Vec_t &ZGenCand_phi, float Acopl){
     float genaco = 1.;
     if (nZGenCand==2){//if we have 2 ZGenCand, we use genaco
@@ -193,36 +180,7 @@ float Get_Aweight(float gen_aco, int nZGenCand, Vec_t &ZGenCand_pt, float lep1pt
     return A_weight;
 }
 
-//Get Correction on N_PV for all simulation
-/*TFile* f_npvs=new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW
-/corrections/correction_npvs_2018.root","read");
-TH1F* h_npvs_weight = (TH1F*) f_npvs->Get("correction_hist_npvs");
-TH1F* h_npvsDown_weight = (TH1F*) f_npvs->Get("correction_hist_npvsDown");
-TH1F* h_npvsUp_weight = (TH1F*) f_npvs->Get("correction_hist_npvsUp");
-float Get_npvs_weight(int PV_npvs){
-    float npvs_weight=h_npvs_weight->GetBinContent(h_npvs_weight->GetXaxis()->FindBin(PV_npvs));
-    return npvs_weight;
-}
 
-float Get_npvsDown_weight(int PV_npvs){
-    float npvs_weight=h_npvsDown_weight->GetBinContent(h_npvsDown_weight->GetXaxis()->FindBin(PV_npvs));
-    return npvs_weight;
-}
-
-float Get_npvsUp_weight(int PV_npvs){
-    float npvs_weight=h_npvsUp_weight->GetBinContent(h_npvsUp_weight->GetXaxis()->FindBin(PV_npvs));
-    return npvs_weight;
-}
-
-
-//Get Correction on beamspot for all simulation only for isMatchedToGenHS=0
-
-TFile* f_bsz=new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/corrections/beamspotz_2018.root","read");
-TF1* f_beamspotz=(TF1*) f_bsz->Get("f_beamspotz");
-
-TFile* f_bs=new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/corrections/beamspot_TF1_2018.root","read");
-TF1* h_bs_width = (TF1*) f_bs->Get("f1");
-*/
 
 ROOT::RVec<float> Get_BScor_ditaudz( Vec_t &PF_dz, ROOT::RVec<int> &PF_isMatchedToGenHS,float PV_z, float zvtxll,string year ){
     float bs_zsigma_obs=spe_cormap[year].h_bs_sigma->GetRandom();

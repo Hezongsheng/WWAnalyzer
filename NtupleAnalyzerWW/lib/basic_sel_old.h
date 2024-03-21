@@ -43,28 +43,12 @@ class elesf
 {
     public:
     string yearconf;
-    TH2F* h_eleRecoeffAbove20;
-    TH2F* h_eleRecoeffBelow20;
+    TH2F* h_eleRecoeff;
     TH2F* h_eleIDSF;
     elesf();
     elesf(string year);
 };
 
-class trgsf
-{
-    public:
-    string yearconf;
-    TH2F* h_mu_trg24_data;
-    TH2F* h_mu_trg24_zll;
-    TH2F* h_mu_trg8_data;
-    TH2F* h_mu_trg8_zll;
-    TH2F* h_ele_trg24_data;
-    TH2F* h_ele_trg24_zll;
-    TH2F* h_ele_trg12_data;
-    TH2F* h_ele_trg12_zll;
-    trgsf();
-    trgsf(string year);
-};
 
 
 
@@ -95,16 +79,7 @@ float GetMuonTriggerSF_syst(TLorentzVector my_mu, string year);
 float GetMuonTriggerSF_crosstrg(TLorentzVector my_mu, string year);
 float GetElerecoSF(TLorentzVector my_ele, string year);
 float GetEleIDSF(TLorentzVector my_ele, string year);
-float GetEffEleTrg24_Data(TLorentzVector my_ele, string year);
-float GetEffEleTrg12_Data(TLorentzVector my_ele, string year);
-float GetEffMuTrg24_Data(TLorentzVector my_mu, string year);
-float GetEffMuTrg8_Data(TLorentzVector my_mu, string year);
-float GetEffEleTrg24_Zll(TLorentzVector my_ele, string year);
-float GetEffEleTrg12_Zll(TLorentzVector my_ele, string year);
-float GetEffMuTrg24_Zll(TLorentzVector my_mu, string year);
-float GetEffMuTrg8_Zll(TLorentzVector my_mu, string year);
-float GetTrgSF(float eff_e_trg24_data, float eff_e_trg12_data, float eff_mu_trg24_data, float eff_mu_trg8_data, float eff_e_trg24_zll, float eff_e_trg12_zll, float eff_mu_trg24_zll, float eff_mu_trg8_zll, bool is_mu8ele23, bool is_mu23ele12);
-float GetSFweight_emu(float murecosf, float muisosf,float muidsf, float elerecosf, float eleidsf, float trgsf);
+float GetSFweight_emu(float murecosf, float muisosf,float muidsf, float mutrgsf, float elerecosf, float eleidsf);
 
 
 

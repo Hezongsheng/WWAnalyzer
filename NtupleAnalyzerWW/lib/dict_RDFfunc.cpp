@@ -90,6 +90,51 @@ namespace ROOT {
 } // end of namespace ROOT
 
 namespace ROOT {
+   static TClass *elesf_Dictionary();
+   static void elesf_TClassManip(TClass*);
+   static void *new_elesf(void *p = nullptr);
+   static void *newArray_elesf(Long_t size, void *p);
+   static void delete_elesf(void *p);
+   static void deleteArray_elesf(void *p);
+   static void destruct_elesf(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::elesf*)
+   {
+      ::elesf *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::elesf));
+      static ::ROOT::TGenericClassInfo 
+         instance("elesf", "basic_sel.h", 42,
+                  typeid(::elesf), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &elesf_Dictionary, isa_proxy, 4,
+                  sizeof(::elesf) );
+      instance.SetNew(&new_elesf);
+      instance.SetNewArray(&newArray_elesf);
+      instance.SetDelete(&delete_elesf);
+      instance.SetDeleteArray(&deleteArray_elesf);
+      instance.SetDestructor(&destruct_elesf);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::elesf*)
+   {
+      return GenerateInitInstanceLocal((::elesf*)nullptr);
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal((const ::elesf*)nullptr); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *elesf_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const ::elesf*)nullptr)->GetClass();
+      elesf_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void elesf_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
    static TClass *Getxsw_W_Dictionary();
    static void Getxsw_W_TClassManip(TClass*);
    static void *new_Getxsw_W(void *p = nullptr);
@@ -104,7 +149,7 @@ namespace ROOT {
       ::Getxsw_W *ptr = nullptr;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::Getxsw_W));
       static ::ROOT::TGenericClassInfo 
-         instance("Getxsw_W", "basic_sel.h", 29,
+         instance("Getxsw_W", "basic_sel.h", 73,
                   typeid(::Getxsw_W), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &Getxsw_W_Dictionary, isa_proxy, 4,
                   sizeof(::Getxsw_W) );
@@ -202,6 +247,27 @@ namespace ROOT {
 
 namespace ROOT {
    // Wrappers around operator new
+   static void *new_elesf(void *p) {
+      return  p ? new(p) ::elesf : new ::elesf;
+   }
+   static void *newArray_elesf(Long_t nElements, void *p) {
+      return p ? new(p) ::elesf[nElements] : new ::elesf[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_elesf(void *p) {
+      delete ((::elesf*)p);
+   }
+   static void deleteArray_elesf(void *p) {
+      delete [] ((::elesf*)p);
+   }
+   static void destruct_elesf(void *p) {
+      typedef ::elesf current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class ::elesf
+
+namespace ROOT {
+   // Wrappers around operator new
    static void *new_Getxsw_W(void *p) {
       return  p ? new(p) ::Getxsw_W : new ::Getxsw_W;
    }
@@ -262,6 +328,7 @@ nullptr
 #pragma clang diagnostic ignored "-Wreturn-type-c-linkage"
 extern int __Cling_AutoLoading_Map;
 class __attribute__((annotate("$clingAutoload$basic_sel.h")))  musf;
+class __attribute__((annotate("$clingAutoload$basic_sel.h")))  elesf;
 class __attribute__((annotate("$clingAutoload$basic_sel.h")))  Getxsw_W;
 class __attribute__((annotate("$clingAutoload$Correction.h")))  spe_cor;
 )DICTFWDDCLS";
@@ -279,6 +346,7 @@ class __attribute__((annotate("$clingAutoload$Correction.h")))  spe_cor;
 )DICTPAYLOAD";
     static const char* classesHeaders[] = {
 "Getxsw_W", payloadCode, "@",
+"elesf", payloadCode, "@",
 "musf", payloadCode, "@",
 "spe_cor", payloadCode, "@",
 nullptr

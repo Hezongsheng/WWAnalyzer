@@ -116,11 +116,9 @@ map<string, musf> musfmap = {
 elesf::elesf(string year){
     yearconf = year;
     if (year == "2018"){
-        TFile *f_recoAbove20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptAbove20.txt_EGM2D_UL2018.root","READ");
-        TFile *f_recoBelow20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptBelow20.txt_EGM2D_UL2018.root","READ");
+        TFile *f_reco = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptAbove20.txt_EGM2D_UL2018.root","READ");
         TFile *f_eleID = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi.txt_Ele_wp80iso_EGM2D.root","READ");
-        h_eleRecoeffAbove20 = (TH2F*)f_recoAbove20->Get("EGamma_SF2D");
-        h_eleRecoeffBelow20 = (TH2F*)f_recoBelow20->Get("EGamma_SF2D");
+        h_eleRecoeff = (TH2F*)f_reco->Get("EGamma_SF2D");
         h_eleIDSF = (TH2F*)f_eleID->Get("EGamma_SF2D");
     }
     else {
@@ -139,38 +137,6 @@ map<string, elesf> elesfmap = {
     {"2018", elesf2018}
 };
 
-
-trgsf::trgsf(string year){
-    yearconf = year;
-    if (year == "2018"){
-        TFile *f_mu_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2018_HLTMu23Ele12.root","read");
-        TFile *f_mu_trg8 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2018_HLTMu8Ele23.root","read");
-        TFile *f_ele_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2018_HLTMu8Ele23.root","read");
-        TFile *f_ele_trg12 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2018_HLTMu23Ele12.root","read");
-        h_mu_trg24_data = (TH2F*) f_mu_trg24->Get("eff_data");
-        h_mu_trg24_zll = (TH2F*) f_mu_trg24->Get("eff_mc");
-        h_mu_trg8_data = (TH2F*) f_mu_trg8->Get("eff_data");
-        h_mu_trg8_zll = (TH2F*) f_mu_trg8->Get("eff_mc");
-        h_ele_trg24_data = (TH2F*) f_ele_trg24->Get("eff_data");
-        h_ele_trg24_zll = (TH2F*) f_ele_trg24->Get("eff_mc");
-        h_ele_trg12_data = (TH2F*) f_ele_trg12->Get("eff_data");
-        h_ele_trg12_zll = (TH2F*) f_ele_trg12->Get("eff_mc");
-    }
-     else {
-        cout << "wrong year configuration" << endl;
-    }
-}
-
-trgsf::trgsf(){
-
-}
-
-
-trgsf trgsf2018("2018");
-
-map<string, trgsf> trgsfmap = {
-    {"2018", trgsf2018}
-};
 
 
 
@@ -310,16 +276,9 @@ float GetMuonTriggerSF_syst(TLorentzVector my_mu, string year){
 
 float GetElerecoSF(TLorentzVector my_ele, string year){
     float ele_pt = my_ele.Pt();
-    float recosf;
     if (ele_pt>500) ele_pt = 499;
-    if (ele_pt<10) ele_pt = 10;
-    if (ele_pt>=20){
-        recosf = elesfmap[year].h_eleRecoeffAbove20->GetBinContent(elesfmap[year].h_eleRecoeffAbove20->GetXaxis()->FindBin(my_ele.Eta()),elesfmap[year].h_eleRecoeffAbove20->GetYaxis()->FindBin(ele_pt));
-    }
-    else{
-        recosf = elesfmap[year].h_eleRecoeffBelow20->GetBinContent(elesfmap[year].h_eleRecoeffBelow20->GetXaxis()->FindBin(my_ele.Eta()),elesfmap[year].h_eleRecoeffBelow20->GetYaxis()->FindBin(ele_pt));
-    }
-    
+    if (ele_pt<10) ele_pt = 11;
+    float recosf = elesfmap[year].h_eleRecoeff->GetBinContent(elesfmap[year].h_eleRecoeff->GetXaxis()->FindBin(my_ele.Eta()),elesfmap[year].h_eleRecoeff->GetYaxis()->FindBin(ele_pt));
     return recosf;
 }
 
@@ -333,93 +292,9 @@ float GetEleIDSF(TLorentzVector my_ele, string year){
 
 
 
-
-
-float GetEffEleTrg24_Data(TLorentzVector my_ele, string year){
-    float ele_pt = my_ele.Pt();
-    if (ele_pt>200) ele_pt = 199;
-    if (ele_pt<15) ele_pt = 15;
-    float eff_ele_trg24_data = trgsfmap[year].h_ele_trg24_data->GetBinContent(trgsfmap[year].h_ele_trg24_data->GetXaxis()->FindBin(ele_pt),trgsfmap[year].h_ele_trg24_data->GetYaxis()->FindBin(fabs(my_ele.Eta())));
-    return eff_ele_trg24_data;
-}
-
-float GetEffEleTrg12_Data(TLorentzVector my_ele, string year){
-    float ele_pt = my_ele.Pt();
-    if (ele_pt>200) ele_pt = 199;
-    if (ele_pt<15) ele_pt = 15;
-    float eff_ele_trg12_data = trgsfmap[year].h_ele_trg12_data->GetBinContent(trgsfmap[year].h_ele_trg12_data->GetXaxis()->FindBin(ele_pt),trgsfmap[year].h_ele_trg12_data->GetYaxis()->FindBin(fabs(my_ele.Eta())));
-    return eff_ele_trg12_data;
-}
-
-float GetEffMuTrg24_Data(TLorentzVector my_mu, string year){
-    float mu_pt = my_mu.Pt();
-    if (mu_pt>200) mu_pt = 199;
-    if (mu_pt<15) mu_pt = 15;
-    float eff_mu_trg24_data = trgsfmap[year].h_mu_trg24_data->GetBinContent(trgsfmap[year].h_mu_trg24_data->GetXaxis()->FindBin(mu_pt),trgsfmap[year].h_mu_trg24_data->GetYaxis()->FindBin(fabs(my_mu.Eta())));
-    return eff_mu_trg24_data;
-}
-
-float GetEffMuTrg8_Data(TLorentzVector my_mu, string year){
-    float mu_pt = my_mu.Pt();
-    if (mu_pt>200) mu_pt = 199;
-    if (mu_pt<15) mu_pt = 15;
-    float eff_mu_trg8_data = trgsfmap[year].h_mu_trg8_data->GetBinContent(trgsfmap[year].h_mu_trg8_data->GetXaxis()->FindBin(mu_pt),trgsfmap[year].h_mu_trg8_data->GetYaxis()->FindBin(fabs(my_mu.Eta())));
-    return eff_mu_trg8_data;
-}
-
-
-
-float GetEffEleTrg24_Zll(TLorentzVector my_ele, string year){
-    float ele_pt = my_ele.Pt();
-    if (ele_pt>200) ele_pt = 199;
-    if (ele_pt<15) ele_pt = 15;
-    float eff_ele_trg24_zll = trgsfmap[year].h_ele_trg24_zll->GetBinContent(trgsfmap[year].h_ele_trg24_zll->GetXaxis()->FindBin(ele_pt),trgsfmap[year].h_ele_trg24_zll->GetYaxis()->FindBin(fabs(my_ele.Eta())));
-    return eff_ele_trg24_zll;
-}
-
-float GetEffEleTrg12_Zll(TLorentzVector my_ele, string year){
-    float ele_pt = my_ele.Pt();
-    if (ele_pt>200) ele_pt = 199;
-    if (ele_pt<15) ele_pt = 15;
-    float eff_ele_trg12_zll = trgsfmap[year].h_ele_trg12_zll->GetBinContent(trgsfmap[year].h_ele_trg12_zll->GetXaxis()->FindBin(ele_pt),trgsfmap[year].h_ele_trg12_zll->GetYaxis()->FindBin(fabs(my_ele.Eta())));
-    return eff_ele_trg12_zll;
-}
-
-float GetEffMuTrg24_Zll(TLorentzVector my_mu, string year){
-    float mu_pt = my_mu.Pt();
-    if (mu_pt>200) mu_pt = 199;
-    if (mu_pt<15) mu_pt = 15;
-    float eff_mu_trg24_zll = trgsfmap[year].h_mu_trg24_zll->GetBinContent(trgsfmap[year].h_mu_trg24_zll->GetXaxis()->FindBin(mu_pt),trgsfmap[year].h_mu_trg24_zll->GetYaxis()->FindBin(fabs(my_mu.Eta())));
-    return eff_mu_trg24_zll;
-}
-
-float GetEffMuTrg8_Zll(TLorentzVector my_mu, string year){
-    float mu_pt = my_mu.Pt();
-    if (mu_pt>200) mu_pt = 199;
-    if (mu_pt<15) mu_pt = 15;
-    float eff_mu_trg8_zll = trgsfmap[year].h_mu_trg8_zll->GetBinContent(trgsfmap[year].h_mu_trg8_zll->GetXaxis()->FindBin(mu_pt),trgsfmap[year].h_mu_trg8_zll->GetYaxis()->FindBin(fabs(my_mu.Eta())));
-    return eff_mu_trg8_zll;
-}
-
-float GetTrgSF(float eff_ele_trg24_data, float eff_ele_trg12_data, float eff_mu_trg24_data, float eff_mu_trg8_data, float eff_ele_trg24_zll, float eff_ele_trg12_zll, float eff_mu_trg24_zll, float eff_mu_trg8_zll, bool is_mu8ele23, bool is_mu23ele12){
-    float probData =eff_ele_trg24_data*eff_mu_trg8_data*int(is_mu8ele23)+eff_mu_trg24_data*eff_ele_trg12_data*int(is_mu23ele12)-eff_ele_trg24_data*eff_mu_trg24_data*int(is_mu8ele23 && is_mu23ele12);
-    float probMC =eff_ele_trg24_zll*eff_mu_trg8_zll*int(is_mu8ele23)+eff_mu_trg24_zll*eff_ele_trg12_zll*int(is_mu23ele12)-eff_ele_trg24_zll*eff_mu_trg24_zll*int(is_mu8ele23 && is_mu23ele12);
-    float sf_trg = 1;
-    if (probMC!=0){
-        sf_trg=probData/probMC;
-    }
-    return sf_trg;
-}
-
-
-
-
-
-
-
-float GetSFweight_emu(float murecosf, float muisosf,float muidsf, float elerecosf, float eleidsf, float trgsf){
+float GetSFweight_emu(float murecosf, float muisosf,float muidsf, float mutrgsf, float elerecosf, float eleidsf){
     float aweight=1.0;
-    aweight = aweight*murecosf*muidsf*muisosf*elerecosf*eleidsf*trgsf;
+    aweight = aweight*murecosf*muidsf*muisosf*mutrgsf*elerecosf*eleidsf;
     return aweight;
 }
 
