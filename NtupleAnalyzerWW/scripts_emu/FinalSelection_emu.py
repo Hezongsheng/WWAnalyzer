@@ -18,11 +18,11 @@ ROOT.EnableImplicitMT();
 
 ### this code is used to perform basic selection on ntuples after nanoaod analyzer
 ### year: 2016pre, 2016post, 2017, 2018
-### name: name of ntuple after analyzer
 ### sample: output root file name
+### inclusive or exclusive selection
 year = sys.argv[1]
 sample = sys.argv[2]
-#name = sys.argv[3]
+name = sys.argv[3]
 
 print ("year is ", year , type(year)," " , " sample is ", sample)
 
@@ -58,24 +58,25 @@ if (year=="2016post"): luminosity=16810.0
 if (isdata):
     weight = 1.0
 
-
-
-
-
-
 #xs eff need to be edited
 if (sample=="DY"): 
     xs=6077.22 
     eff=0.318
     weight=luminosity*xs/ngen*eff
+
+if (sample=="DYemu"):
+    xs=2025.7*(0.178+0.174)*(0.178+0.174)
+    eff=0.10687
+    weight=luminosity*xs/ngen*eff
     
     
-elif (sample=="TTTo2L2Nu"): 
+elif ("TTTo2L2Nu" in sample): 
     xs=791*0.1061
     eff=0.657
     weight=luminosity*xs/ngen*eff
+
     
-elif (sample=="TTToSemiLeptonic" or "TTToSemiLeptonic" in sample): 
+elif ("TTToSemiLeptonic" in sample): 
     xs=791*0.4392
     eff=0.401
     weight=luminosity*xs/ngen*eff
@@ -105,8 +106,8 @@ elif (sample=="ZZ2L2Q"):
 #    eff=0.372686
 #    weight=luminosity*xs/ngen*eff
     
-elif (sample=="WZ2L2Q"): 
-    xs=5.595 
+elif (sample=="WZ2Q2L"): 
+    xs=6.419 
     eff=0.341
     weight=luminosity*xs/ngen*eff
 
@@ -157,10 +158,14 @@ elif (sample=="GGToTauTau_Ctb20"):
     weight=luminosity*xs/ngen*eff
 
 elif (sample=="GGToWW"):
-    xs = 0.00692
+    xs = 0.006561
     eff = 0.368
     weight = luminosity*xs/ngen*eff
 
+elif ("VV2L2Nu" in sample):
+    xs = 11.09 + 0.9738
+    eff = 0.392
+    weight = luminosity*xs/ngen*eff
 
 print ("cross section is ", xs, " eff is ", eff, " xsweight is ", weight)
 
@@ -181,15 +186,37 @@ df_var = df_var.Define("my_ele","GetLepVector(eleindex,LepCand_pt,LepCand_eta,Le
     .Define("mupt","my_mu.Pt()").Define("mueta","my_mu.Eta()").Define("muphi","my_mu.Phi()").Define("mudz","LepCand_dz[muindex]")\
     .Define("isOS","GetisOS(LepCand_charge,eleindex,muindex)").Define("ptemu","(my_mu+my_ele).Pt()")
 
-df_sel = df_var.Filter("fabs(eleeta)<2.4 && fabs(mueta)<2.4").Filter("LepCand_muonMediumId[muindex]==1 && LepCand_muonIso[muindex]<0.20")\
-    .Filter("my_ele.DeltaR(my_mu)>=0.5")
+df_sel = df_var.Filter("fabs(eleeta)<2.5 && fabs(mueta)<2.4").Filter("LepCand_muonMediumId[muindex]==1 && LepCand_muonIso[muindex]<0.20")\
+    .Filter("LepCand_eleMVAiso80[eleindex]==1").Filter("my_ele.DeltaR(my_mu)>=0.5")
+
+#Add Trigger 
+df_sel = df_sel.Define("is_mu8ele23","(HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ) && (my_ele.Pt()>24) && (my_mu.Pt()>10)").Define("is_mu23ele12","(HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ) && (my_ele.Pt()>13) && (my_mu.Pt()>24)")
+
+df_sel = df_sel.Filter("is_mu8ele23 || is_mu23ele12").Filter("my_ele.Pt()>15").Filter("my_mu.Pt()>15")
 
 
-if (sample=="DY" or sample=="GGToTauTau_Ctb20" or sample=="GGToTauTau"):
-    df_sel = df_sel.Filter("nGenCand==2").Define("my_gen0","GetLepVector(0, GenCand_pt, GenCand_eta, GenCand_phi)").Define("my_gen1","GetLepVector(1, GenCand_pt, GenCand_eta, GenCand_phi)")\
-        .Define("DRmatch1","my_ele.DeltaR(my_gen0) + my_mu.DeltaR(my_gen1)").Define("DRmatch2","my_ele.DeltaR(my_gen1) + my_mu.DeltaR(my_gen0)")\
-        .Filter("DRmatch1 < 0.2 || DRmatch2 < 0.2")
 
+#Add xsweight and SFweight
+if (not isdata):
+    df_sel = df_sel.Define("murecosf","GetMuonrecoSF(my_mu,\"{}\")".format(year)).Define("murecosf_stat","GetMuonrecoSF_stat(my_mu,\"{}\")".format(year)).Define("murecosf_syst","GetMuonrecoSF_syst(my_mu,\"{}\")".format(year))\
+        .Define("mutrgsf","GetMuonTriggerSF(my_mu,\"{}\")".format(year)).Define("mutrgsf_stat","GetMuonTriggerSF_stat(my_mu,\"{}\")".format(year)).Define("mutrgsf_syst","GetMuonTriggerSF_syst(my_mu,\"{}\")".format(year))\
+        .Define("muidsf","GetMuonIDSF(my_mu,\"{}\")".format(year)).Define("muidsf_stat","GetMuonIDSF_stat(my_mu,\"{}\")".format(year)).Define("muidsf_syst","GetMuonIDSF_syst(my_mu,\"{}\")".format(year))\
+        .Define("muisosf","GetMuonIsoSF(my_mu,\"{}\")".format(year)).Define("muisosf_stat","GetMuonIsoSF_stat(my_mu,\"{}\")".format(year)).Define("muisosf_syst","GetMuonIsoSF_syst(my_mu,\"{}\")".format(year))\
+        .Define("elerecosf","GetElerecoSF(my_ele,\"{}\")".format(year)).Define("eleidsf","GetEleIDSF(my_ele,\"{}\")".format(year))\
+        .Define("eff_ele_trg24_data","GetEffEleTrg24_Data(my_ele,\"{}\")".format(year)).Define("eff_ele_trg12_data","GetEffEleTrg12_Data(my_ele,\"{}\")".format(year))\
+        .Define("eff_mu_trg24_data","GetEffMuTrg24_Data(my_mu,\"{}\")".format(year)).Define("eff_mu_trg8_data","GetEffMuTrg8_Data(my_mu,\"{}\")".format(year))\
+        .Define("eff_ele_trg24_zll","GetEffEleTrg24_Zll(my_ele,\"{}\")".format(year)).Define("eff_ele_trg12_zll","GetEffEleTrg12_Zll(my_ele,\"{}\")".format(year))\
+        .Define("eff_mu_trg24_zll","GetEffMuTrg24_Zll(my_mu,\"{}\")".format(year)).Define("eff_mu_trg8_zll","GetEffMuTrg8_Zll(my_mu,\"{}\")".format(year))\
+        .Define("trgsf","GetTrgSF(eff_ele_trg24_data, eff_ele_trg12_data, eff_mu_trg24_data, eff_mu_trg8_data, eff_ele_trg24_zll, eff_ele_trg12_zll, eff_mu_trg24_zll, eff_mu_trg8_zll, is_mu8ele23, is_mu23ele12)")
+    if (not isW):
+        df_sel = df_sel.Define("xsweight","{}*genWeight".format(weight)).Define("SFweight","GetSFweight_emu(murecosf, muisosf, muidsf, elerecosf, eleidsf, trgsf)")
+else:
+    df_sel = df_sel.Define("murecosf","1.0").Define("murecosf_stat","1.0").Define("murecosf_syst","1.0")\
+        .Define("mutrgsf","1.0").Define("mutrgsf_stat","1.0").Define("mutrgsf_syst","1.0")\
+        .Define("muidsf","1.0").Define("muidsf_stat","1.0").Define("muidsf_syst","1.0")\
+        .Define("muisosf","1.0").Define("muisosf_stat","1.0").Define("muisosf_syst","1.0")\
+        .Define("elerecosf","1.0").Define("eleidsf","1.0")
+    df_sel = df_sel.Define("xsweight","1.0").Define("SFweight","1.0")
 
 
 #Add information of mass (mvis>40, transverse mass, collinear mass), acoplanarity
@@ -197,7 +224,11 @@ df_var = df_sel.Define("mvis","(my_ele+my_mu).M()")\
     .Define("mumtrans","GetTransmass(my_mu, MET_pt, MET_phi)")\
     .Define("elemtrans","GetTransmass(my_ele, MET_pt, MET_phi)")\
     .Define("mcol","GetCollMass(my_ele, my_mu, MET_pt, MET_phi)").Define("Acopl","GetAcopl(my_ele,my_mu)")
-df_sel = df_var.Filter("mvis>40")
+#df_sel = df_var.Filter("mvis>40")
+df_sel = df_var
+
+
+
 
 #Define vtx with 3 definition (simple average, theta-average, pt-average),dzemu<0.1
 df_addvtx = df_sel.Define("zvtxll1","recovtxz1(eledz, mudz,PV_z)")\
@@ -246,7 +277,7 @@ if (isdata):
     df = df.Define("nPUtrk","0")\
     .Define("nPUtrkweight","1.0")
 else:
-    df = df.Define("PUtrkcut","Track_isMatchedToHS==0")\
+    df = df.Define("PUtrkcut","Track_isMatchedToHS==0 && Trkcut==1")\
         .Define("nPUtrk","Sum(PUtrkcut)")\
         .Define("nPUtrkweight","Get_ntpuweight(nPUtrk, zvtxll1, \"{}\")".format(year))
 
@@ -256,15 +287,10 @@ if (isdata):
     df = df.Define("nHStrk","0")\
         .Define("nHStrkweight","1.0")
 else:
-    if (sample=="DY"):
-        df = df.Define("HStrkcut","Track_isMatchedToHS==1")\
-            .Define("nHStrk","Sum(HStrkcut)")\
-            .Define("nHStrkweight","Get_ntHSweight(nHStrk,genAco,\"{}\")".format(year))
-    else:
-        df = df.Define("HStrkcut","Track_isMatchedToHS==1")\
-            .Define("nHStrk","Sum(HStrkcut)")\
-            .Define("nHStrkweight","1.0")
-
+    df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
+        .Define("nHStrk","Sum(HStrkcut)")\
+        .Define("nHStrkweight","Get_ntHSweight(nHStrk,genAco,\"{}\")".format(year))
+    
 
 
 
@@ -280,23 +306,20 @@ columns = ROOT.std.vector("string")()
 for c in ("run","luminosityBlock","event","emuindex",\
     "my_ele","elept","eleeta","elephi","eledz",\
     "my_mu","mupt","mueta","muphi","mudz",\
-    "ptemu","isOS","mvis","mumtrans","elemtrans","mcol","Acopl",\
+    "ptemu","isOS","mvis","mumtrans","elemtrans","mcol","Acopl","xsweight",\
     "zvtxll1","zvtxll2","zvtxll3","genAco","Acoweight",\
     "MET_pt","MET_phi",\
     "nGenCand","GenCand_id","GenCand_pt","GenCand_eta","GenCand_phi",\
     "puWeight","puWeightUp","puWeightDown",\
-    "nTrk","nPUtrk","nHStrk","nPUtrkweight","nHStrkweight"
+    "murecosf","murecosf_stat","murecosf_syst","muidsf","muidsf_stat","muidsf_syst","muisosf","muisosf_stat","muisosf_syst","mutrgsf","mutrgsf_stat","mutrgsf_syst","elerecosf","eleidsf","SFweight",\
+    "nTrk","nPUtrk","nHStrk","nPUtrkweight","nHStrkweight",\
+    "L1PreFiringWeight_Nom","L1PreFiringWeight_Up","L1PreFiringWeight_Dn"
 ):
     columns.push_back(c)
 
 if ("Ctb" in sample):
     columns.push_back("TauG2Weights_ceBRe_0p0")
 
-if (sample=="DY" or sample=="GGToTauTau_Ctb20" or sample=="GGToTauTau"):
-    columns.push_back("my_gen0")
-    columns.push_back("my_gen1")
-    columns.push_back("DRmatch1")
-    columns.push_back("DRmatch2")
 
 
 
@@ -305,8 +328,10 @@ if (sample=="DY" or sample=="GGToTauTau_Ctb20" or sample=="GGToTauTau"):
 
 
 
-
-df.Snapshot("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
+if name == "exclusive":
+    df.Snapshot("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
+elif name == "inclusive":
+    df.Snapshot("Events","/eos/user/z/zohe/WWdata/inclusive/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
 
 nentries = df.Count().GetValue()
 print("After selection entries", nentries)
