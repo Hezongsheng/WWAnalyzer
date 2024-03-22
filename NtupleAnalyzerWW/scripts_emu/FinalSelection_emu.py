@@ -23,8 +23,9 @@ ROOT.EnableImplicitMT();
 year = sys.argv[1]
 sample = sys.argv[2]
 name = sys.argv[3]
+category = sys.argv[4]
 
-print ("year is ", year , type(year)," " , " sample is ", sample)
+print ("year is ", year, " sample is ", sample, " name is ", name, " category is", category)
 
 
 ngen = 0.
@@ -240,7 +241,7 @@ df_addvtx = df_sel.Define("zvtxll1","recovtxz1(eledz, mudz,PV_z)")\
 if (isdata):
     df = df_addvtx.Define("genAco","-99.0").Define("Acoweight","1.0").Define("puWeight","1.0").Define("puWeightUp","1.0").Define("puWeightDown","1.0")
 else:
-    if sample=="DY":
+    if (category == "DY" or category == "VV"):
         df = df_addvtx.Define("genAco","GetGenAco(nGenCand, GenCand_phi, Acopl)").Define("Acoweight","Get_Aweight(genAco, nGenCand, GenCand_pt, elept, mupt, \"{}\")".format(year))
     else:
         df = df_addvtx.Define("genAco","-99.0").Define("Acoweight","1.0")
@@ -275,21 +276,26 @@ df = df.Define("Trkcut","Track_ditaudz<0.05 && (!Track_elematch) && (!Track_muma
 print("Apply nputrack correctionz")
 if (isdata):
     df = df.Define("nPUtrk","0")\
-    .Define("nPUtrkweight","1.0")
+    .Define("nPUtrkweight","1.")
 else:
     df = df.Define("PUtrkcut","Track_isMatchedToHS==0 && Trkcut==1")\
         .Define("nPUtrk","Sum(PUtrkcut)")\
         .Define("nPUtrkweight","Get_ntpuweight(nPUtrk, zvtxll1, \"{}\")".format(year))
 
-#Apply nHStrk correction (only for DY)
+#Apply nHStrk correction (only for DY and VV)
 print("Apply nHStrack correctionz")
 if (isdata):
     df = df.Define("nHStrk","0")\
-        .Define("nHStrkweight","1.0")
+        .Define("nHStrkweight","1.")
 else:
-    df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
-        .Define("nHStrk","Sum(HStrkcut)")\
-        .Define("nHStrkweight","Get_ntHSweight(nHStrk,genAco,\"{}\")".format(year))
+    if (category == "DY" or category == "VV"):
+        df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
+            .Define("nHStrk","Sum(HStrkcut)")\
+            .Define("nHStrkweight","Get_ntHSweight(nHStrk,genAco,\"{}\")".format(year))
+    else:
+        df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
+            .Define("nHStrk","Sum(HStrkcut)")\
+            .Define("nHStrkweight","1.")
     
 
 

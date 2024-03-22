@@ -9,22 +9,28 @@ ROOT.EnableImplicitMT()
 year = sys.argv[1]
 sample = sys.argv[2]
 
-print("year is", year, "sample is", sample)
+print("year is", year, "sample is", sample, "SS")
 
 df = RDataFrame("Events","/eos/user/z/zohe/WWdata/inclusive/ntuples_emu_{}_basicsel/{}.root".format(year,sample))
 if "MuonEG" in sample:
     df = df.Define("allweight","1.0")
 else:
-    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight")
+    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
     
 df = df.Filter("isOS==0")
 h_mvis = df.Histo1D(("mvis","mvis",485,15,500),"mvis","allweight")
-h_ptemu = df.Histo1D(("ptemu","ptemu",270,30,300),"ptemu","allweight")
+h_ptemu = df.Histo1D(("ptemu","ptemu",285,15,300),"ptemu","allweight")
 h_nTrk = df.Histo1D(("nTrk","nTrk",100,0,100),"nTrk","allweight")
 h_elept = df.Histo1D(("elept","elept",100,20,120),"elept","allweight")
 h_mupt = df.Histo1D(("mupt","mupt",100,20,120),"mupt","allweight")
 h_eleeta = df.Histo1D(("eleeta","eleeta",52,-2.5,2.7),"eleeta","allweight")
 h_mueta = df.Histo1D(("mueta","mueta",52,-2.5,2.7),"mueta","allweight")
+Hlist = [h_mvis, h_ptemu, h_nTrk, h_elept, h_mupt, h_eleeta, h_mueta]
+for h in Hlist:
+    overflow = h.GetBinContent(h.GetNbinsX())+h.GetBinContent(h.GetNbinsX()+1)
+    h.SetBinContent(h.GetNbinsX(), overflow)
+    #underflow = h.GetBinContent(0)+h.GetBinContent(1)
+    #h.SetBinContent(1, underflow)
 fout = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_{}.root".format(year,sample),"recreate")
 h_mvis.Write()
 h_ptemu.Write()

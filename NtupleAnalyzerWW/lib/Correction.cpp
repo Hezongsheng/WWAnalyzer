@@ -121,9 +121,8 @@ map<string, spe_cor> spe_cormap = {
 
 
 float GetGenAco(int nZGenCand, Vec_t &ZGenCand_phi, float Acopl){
-    float genaco = 1.;
+    float genaco = 1.0;
     if (nZGenCand==2){//if we have 2 ZGenCand, we use genaco
-
         float dphi = TVector2::Phi_mpi_pi(ZGenCand_phi[0]-ZGenCand_phi[1]);
         genaco = 1-fabs(dphi)/TMath::Pi();
     }
@@ -215,11 +214,11 @@ float Get_ntpuweight(int ntpu, float zvtxll,string year){
     return ntpu_weight;
 }
 
-//Get Correction on NHS_tracks, apply only to DY sample
+//Get Correction on NHS_tracks, apply only to DY and VV sample because they use the same generator
 //TFile *f_hsnt=new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/corrections/nhs_correction_2018.root");
 //TH2F* correction_mapHS=(TH2F*) f_hsnt->Get("correction_map");
-float Get_ntHSweight(int ntracksHS, float gen_aco,string year){
-    float nths_weight=spe_cormap[year].correction_mapHS->GetBinContent(spe_cormap[year].correction_mapHS->GetXaxis()->FindBin(TMath::Min(30,ntracksHS)),spe_cormap[year].correction_mapHS->GetYaxis()->FindBin(gen_aco)); // here ntracksHS is number of HS tracks in window not matched to the tautau decay products
+float Get_ntHSweight(int ntracksHS, float gen_aco, string year){
+    float nths_weight=spe_cormap[year].correction_mapHS->GetBinContent(spe_cormap[year].correction_mapHS->GetXaxis()->FindBin(TMath::Min(39,ntracksHS)),spe_cormap[year].correction_mapHS->GetYaxis()->FindBin(gen_aco));
     return nths_weight;
 }
 
