@@ -9,6 +9,7 @@ ROOT.gInterpreter.AddIncludePath('/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/l
 ROOT.gInterpreter.Declare('#include "basic_sel.h"')
 ROOT.gInterpreter.Declare('#include "GetPFTrk.h"')
 ROOT.gInterpreter.Declare('#include "Correction.h"')
+ROOT.gInterpreter.Declare('#include "myHelper.h"')
 ROOT.gSystem.Load('/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/lib/RDFfunc.so')
 ROOT.EnableImplicitMT();
 
@@ -187,8 +188,13 @@ df_var = df_var.Define("my_ele","GetLepVector(eleindex,LepCand_pt,LepCand_eta,Le
     .Define("mupt","my_mu.Pt()").Define("mueta","my_mu.Eta()").Define("muphi","my_mu.Phi()").Define("mudz","LepCand_dz[muindex]")\
     .Define("isOS","GetisOS(LepCand_charge,eleindex,muindex)").Define("ptemu","(my_mu+my_ele).Pt()")
 
-df_sel = df_var.Filter("fabs(eleeta)<2.5 && fabs(mueta)<2.4").Filter("LepCand_muonMediumId[muindex]==1 && LepCand_muonIso[muindex]<0.20")\
-    .Filter("LepCand_eleMVAiso80[eleindex]==1").Filter("my_ele.DeltaR(my_mu)>=0.5")
+
+df_sel = df_var.Filter("fabs(eleeta)<2.5 && fabs(mueta)<2.4").Filter("LepCand_muonMediumId[muindex]==1").Filter("my_ele.DeltaR(my_mu)>=0.5")
+if name=="exclusive" or name=="inclusive":
+    df_sel = df_sel.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==1").Define("FRweight","GetFRweight(my_ele.Pt(), my_mu.Pt(), \"{}\")".format(year))
+elif name=="FR":
+    df_sel = df_sel.Define("muiso","LepCand_muonIso[muindex]<0.20").Define("muantiiso","LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Define("eleiso","LepCand_eleMVAiso80[eleindex]==1").Define("eleantiiso","LepCand_eleMVAiso80[eleindex]==0")
+
 
 #Add Trigger 
 df_sel = df_sel.Define("is_mu8ele23","(HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ) && (my_ele.Pt()>24) && (my_mu.Pt()>10)").Define("is_mu23ele12","(HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ) && (my_ele.Pt()>13) && (my_mu.Pt()>24)")
@@ -239,12 +245,12 @@ df_addvtx = df_sel.Define("zvtxll1","recovtxz1(eledz, mudz,PV_z)")\
 
 #Acoplanarity weights only for DY samples
 if (isdata):
-    df = df_addvtx.Define("genAco","-99.0").Define("Acoweight","1.0").Define("puWeight","1.0").Define("puWeightUp","1.0").Define("puWeightDown","1.0")
+    df = df_addvtx.Define("genAco","float(-99)").Define("Acoweight","float(1)").Define("puWeight","1.0").Define("puWeightUp","1.0").Define("puWeightDown","1.0")
 else:
     if (category == "DY" or category == "VV"):
         df = df_addvtx.Define("genAco","GetGenAco(nGenCand, GenCand_phi, Acopl)").Define("Acoweight","Get_Aweight(genAco, nGenCand, GenCand_pt, elept, mupt, \"{}\")".format(year))
     else:
-        df = df_addvtx.Define("genAco","-99.0").Define("Acoweight","1.0")
+        df = df_addvtx.Define("genAco","float(-99)").Define("Acoweight","float(1)")
 
 
 
@@ -261,7 +267,7 @@ print("Calculate ditaudz")
 if (isdata):
     df = df.Define("Track_ditaudz","Compute_ditaudz(Track_dz,PV_z,zvtxll1)")
 else:
-    df = df.Define("Track_ditaudz","Compute_ditaudz(Track_dz, PV_z, zvtxll1)")
+    df = df.Define("Track_ditaudz","Get_BScor_ditaudz(Track_dz,Track_isMatchedToHS,PV_z,zvtxll1,\"{}\")".format(year))
 
 df = df.Define("Trkcut","Track_ditaudz<0.05 && (!Track_elematch) && (!Track_mumatch) && (Track_pt > 0.5) && abs(Track_eta) < 2.5")\
     .Define("nTrk","Sum(Trkcut)")\
@@ -291,12 +297,43 @@ else:
     if (category == "DY" or category == "VV"):
         df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
             .Define("nHStrk","Sum(HStrkcut)")\
-            .Define("nHStrkweight","Get_ntHSweight(nHStrk,genAco,\"{}\")".format(year))
+            .Define("nHStrkweight","Get_ntHSweight(1,nHStrk,genAco,\"{}\")".format(year))
     else:
         df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
             .Define("nHStrk","Sum(HStrkcut)")\
-            .Define("nHStrkweight","1.")
+            .Define("nHStrkweight","float(1)")
     
+uncertainties = ["","_CMS_pileup_yearDown","_CMS_pileup_yearUp","_CMS_emutrg_lowmuhighe_systDown","_CMS_emutrg_lowmuhighe_systUp","_CMS_emutrg_highmulowe_systDown","_CMS_emutrg_highmulowe_systUp","_CMS_emutrg_highmuhighe_systDown","_CMS_emutrg_highmuhighe_systUp","_CMS_elasticRescalingDown","_CMS_elasticRescalingUp","_CMS_L1PrefiringDown","_CMS_L1PrefiringUp","_CMS_muId_systDown","_CMS_muId_systUp","_CMS_muId_stat_yearDown","_CMS_muId_stat_yearUp","_CMS_muIso_systDown","_CMS_muIso_systUp","_CMS_muIso_stat_yearDown","_CMS_muIso_stat_yearUp","_CMS_elId_systDown","_CMS_elId_systUp","_CMS_ISRDown","_CMS_ISRUp","_CMS_FSRDown","_CMS_FSRUp","_CMS_PDFDown","_CMS_PDFUp","_CMS_muR0p5_muF0p5","_CMS_muRDown","_CMS_muFDown","_CMS_muFUp","_CMS_muRUp","_CMS_muR2p0_muF2p0"]
+
+for k in range(23):
+    if year=="2016pre":
+        uncertainties[k]=uncertainties[k].replace("year","2016preVFP")
+    elif year=="2016post":
+        uncertainties[k]=uncertainties[k].replace("year","2016postVFP")
+    elif year=="2017":
+        uncertainties[k]=uncertainties[k].replace("year","2017")
+    elif year=="2018":
+        uncertainties[k]=uncertainties[k].replace("year","2018")
+
+fake_uncertainties=["_CMS_fakebkg_emu_stat_pte15to24_ptmu24to35_yearDown","_CMS_fakebkg_emu_stat_pte15to24_ptmu24to35_yearUp","_CMS_fakebkg_emu_stat_pte15to24_ptmu35to45_yearDown","_CMS_fakebkg_emu_stat_pte15to24_ptmu35to45_yearUp","_CMS_fakebkg_emu_stat_pte15to24_ptmugt45_yearDown","_CMS_fakebkg_emu_stat_pte15to24_ptmugt45_yearUp","_CMS_fakebkg_emu_stat_pte24to35_ptmu15to24_yearDown","_CMS_fakebkg_emu_stat_pte24to35_ptmu15to24_yearUp","_CMS_fakebkg_emu_stat_pte24to35_ptmu24to35_yearDown","_CMS_fakebkg_emu_stat_pte24to35_ptmu24to35_yearUp","_CMS_fakebkg_emu_stat_pte24to35_ptmu35to45_yearDown","_CMS_fakebkg_emu_stat_pte24to35_ptmu35to45_yearUp","_CMS_fakebkg_emu_stat_pte24to35_ptmugt45_yearDown","_CMS_fakebkg_emu_stat_pte24to35_ptmugt45_yearUp","_CMS_fakebkg_emu_stat_pte35to45_ptmu15to24_yearDown","_CMS_fakebkg_emu_stat_pte35to45_ptmu15to24_yearUp","_CMS_fakebkg_emu_stat_pte35to45_ptmu24to35_yearDown","_CMS_fakebkg_emu_stat_pte35to45_ptmu24to35_yearUp","_CMS_fakebkg_emu_stat_pte35to45_ptmu35to45_yearDown","_CMS_fakebkg_emu_stat_pte35to45_ptmu35to45_yearUp","_CMS_fakebkg_emu_stat_pte35to45_ptmugt45_yearDown","_CMS_fakebkg_emu_stat_pte35to45_ptmugt45_yearUp","_CMS_fakebkg_emu_stat_ptegt45_ptmu15to24_yearDown","_CMS_fakebkg_emu_stat_ptegt45_ptmu15to24_yearUp","_CMS_fakebkg_emu_stat_ptegt45_ptmu24to35_yearDown","_CMS_fakebkg_emu_stat_ptegt45_ptmu24to35_yearUp","_CMS_fakebkg_emu_stat_ptegt45_ptmu35to45_yearDown","_CMS_fakebkg_emu_stat_ptegt45_ptmu35to45_yearUp","_CMS_fakebkg_emu_stat_ptegt45_ptmugt45_yearDown","_CMS_fakebkg_emu_stat_ptegt45_ptmugt45_yearUp"]
+
+for k in range(30):
+    if year=="2016pre":
+        uncertainties[k]=fake_uncertainties[k].replace("year","2016preVFP")
+    elif year=="2016post":
+        uncertainties[k]=fake_uncertainties[k].replace("year","2016postVFP")
+    elif year=="2017":
+        uncertainties[k]=fake_uncertainties[k].replace("year","2017")
+    elif year=="2018":
+        uncertainties[k]=fake_uncertainties[k].replace("year","2018")
+
+
+
+
+
+
+
+
 
 
 
@@ -322,29 +359,117 @@ for c in ("run","luminosityBlock","event","emuindex",\
     "L1PreFiringWeight_Nom","L1PreFiringWeight_Up","L1PreFiringWeight_Dn"
 ):
     columns.push_back(c)
+if name=="FR":
+    columns.push_back("muiso")
+    columns.push_back("muantiiso")
+    columns.push_back("eleiso")
+    columns.push_back("eleantiiso")
+if name=="exclusive" or name=="inclusive":
+    columns.push_back("FRweight")
 
-if ("Ctb" in sample):
-    columns.push_back("TauG2Weights_ceBRe_0p0")
+#if ("Ctb" in sample):
+#    columns.push_back("TauG2Weights_ceBRe_0p0")
+
+'''
+def save_df_file(df_f, cat, file_f, columns_f):
+    df_o = df_f.Filter("elept>15 && elept<=24").Filter("mupt>24 && mupt<=35")
+    fout_o = ROOT.TFile(file_f+cat+"pte15to24_ptmu24to35.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte15to24_ptmu24to35.root",columns_f)
+
+    fout_o = ROOT.TFile(file_f+cat+"pte15to24_ptmu35to45.root","RECREATE")
+    df_o = df_f.Filter("elept>15 && elept<=24").Filter("mupt>35 && mupt<=45")
+    df_o.Snapshot("Events",file_f+cat+"pte15to24_ptmu35to45.root",columns_f)
+
+    fout_o = ROOT.TFile(file_f+cat+"pte15to24_ptmugt45.root","RECREATE")
+    df_o = df_f.Filter("elept>15 && elept<=24").Filter("mupt>45")
+    df_o.Snapshot("Events",file_f+cat+"pte15to24_ptmugt45.root",columns_f)
 
 
 
+    df_o = df_f.Filter("elept>24 && elept<=35").Filter("mupt>15 && mupt<=24")
+    fout_o = ROOT.TFile(file_f+cat+"pte24to35_ptmu15to24.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte24to35_ptmu15to24.root",columns_f)
+
+    df_o = df_f.Filter("elept>24 && elept<=35").Filter("mupt>24 && mupt<=35")
+    fout_o = ROOT.TFile(file_f+cat+"pte24to35_ptmu24to35.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte24to35_ptmu24to35.root",columns_f)
+
+    df_o = df_f.Filter("elept>24 && elept<=35").Filter("mupt>35 && mupt<=45")
+    fout_o = ROOT.TFile(file_f+cat+"pte24to35_ptmu35to45.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte24to35_ptmu35to45.root",columns_f)
+
+    df_o = df_f.Filter("elept>24 && elept<=35").Filter("mupt>45")
+    fout_o = ROOT.TFile(file_f+cat+"pte24to35_ptmugt45.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte24to35_ptmugt45.root",columns_f)
+    
 
 
+    df_o = df_f.Filter("elept>35 && elept<=45").Filter("mupt>15 && mupt<=24")
+    fout_o = ROOT.TFile(file_f+cat+"pte35to45_ptmu15to24.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte35to45_ptmu15to24.root",columns_f)
 
+    df_o = df_f.Filter("elept>35 && elept<=45").Filter("mupt>24 && mupt<=35")
+    fout_o = ROOT.TFile(file_f+cat+"pte35to45_ptmu24to35.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte35to45_ptmu24to35.root",columns_f)
+
+    df_o = df_f.Filter("elept>35 && elept<=45").Filter("mupt>35 && mupt<=45")
+    fout_o = ROOT.TFile(file_f+cat+"pte35to45_ptmu35to45.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte35to45_ptmu35to45.root",columns_f)
+
+    df_o = df_f.Filter("elept>35 && elept<=45").Filter("mupt>45")
+    fout_o = ROOT.TFile(file_f+cat+"pte35to45_ptmugt45.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"pte35to45_ptmugt45.root",columns_f)
+
+
+    df_o = df_f.Filter("elept>45").Filter("mupt>15 && mupt<=24")
+    fout_o = ROOT.TFile(file_f+cat+"ptegt45_ptmu15to24.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"ptegt45_ptmu15to24.root",columns_f)
+
+    df_o = df_f.Filter("elept>45").Filter("mupt>24 && mupt<=35")
+    fout_o = ROOT.TFile(file_f+cat+"ptegt45_ptmu24to35.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"ptegt45_ptmu24to35.root",columns_f)
+
+    df_o = df_f.Filter("elept>45").Filter("mupt>35 && mupt<=45")
+    fout_o = ROOT.TFile(file_f+cat+"ptegt45_ptmu35to45.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"ptegt45_ptmu35to45.root",columns_f)
+
+    df_o = df_f.Filter("elept>45").Filter("mupt>45")
+    fout_o = ROOT.TFile(file_f+cat+"ptegt45_ptmugt45.root","RECREATE")
+    df_o.Snapshot("Events",file_f+cat+"ptegt45_ptmugt45.root",columns_f)
+'''
 
 
 
 if name == "exclusive":
     df.Snapshot("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
+    nentries = df.Count().GetValue()
+    print("After selection entries", nentries)
+    time_end = timer.time()
+    print("totally cost",time_end-time_start)
 elif name == "inclusive":
     df.Snapshot("Events","/eos/user/z/zohe/WWdata/inclusive/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
+elif name == "FR":
+    df.Snapshot("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/{}.root".format(year, sample),columns)
+    '''
+    df_OS = df.Filter("isOS")
+    df_OSnn = df_OS.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==1")
+    df_OSna = df_OS.Filter("LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Filter("LepCand_eleMVAiso80[eleindex]==1")
+    df_OSan = df_OS.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==0")
+    df_OSaa = df_OS.Filter("LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Filter("LepCand_eleMVAiso80[eleindex]==0")
 
-nentries = df.Count().GetValue()
-print("After selection entries", nentries)
+    df_SS = df.Filter("!isOS")
+    df_SSnn = df_SS.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==1")
+    df_SSna = df_SS.Filter("LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Filter("LepCand_eleMVAiso80[eleindex]==1")
+    df_SSan = df_SS.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==0")
+    df_SSaa = df_SS.Filter("LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Filter("LepCand_eleMVAiso80[eleindex]==0")
 
-time_end = timer.time()
-print("totally cost",time_end-time_start)
-
-
-
-
+    
+    save_df_file(df_OSnn, "OSnn_", fout, columns)
+    save_df_file(df_OSna, "OSna_", fout, columns)
+    save_df_file(df_OSan, "OSan_", fout, columns)
+    save_df_file(df_OSaa, "OSaa_", fout, columns)
+    save_df_file(df_SSnn, "SSnn_", fout, columns)
+    save_df_file(df_SSna, "SSna_", fout, columns)
+    save_df_file(df_SSan, "SSan_", fout, columns)
+    save_df_file(df_SSaa, "SSaa_", fout, columns)
+    '''

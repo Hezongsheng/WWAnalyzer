@@ -146,12 +146,7 @@ for i in range(1, hData.GetNbinsX() + 1):
     Data.SetBinContent(new_bin_index, Data.GetBinContent(new_bin_index) + hData.GetBinContent(i))
 
 
-ftop = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_top.root".format(args.year),"r")
-htop = ROOT.TH1D(ftop.Get(args.variable)) 
-top = ROOT.TH1D("top","new hist of top",var_used.nbins,var_used.binning)
-for i in range(1, htop.GetNbinsX() + 1):
-    new_bin_index = top.FindBin(hData.GetBinCenter(i))
-    top.SetBinContent(new_bin_index, top.GetBinContent(new_bin_index) + htop.GetBinContent(i))
+
 
 
 fVV = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_VV.root".format(args.year),"r")
@@ -161,14 +156,6 @@ for i in range(1, hVV.GetNbinsX() + 1):
     new_bin_index = VV.FindBin(hVV.GetBinCenter(i))
     VV.SetBinContent(new_bin_index, VV.GetBinContent(new_bin_index) + hVV.GetBinContent(i))
 
-fDYemu = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_DYemu.root".format(args.year),"r")
-hDYemu = ROOT.TH1D(fDYemu.Get(args.variable))
-DYemu = ROOT.TH1D("DYemu","new hist of DYemu",var_used.nbins,var_used.binning)
-for i in range(1, hDYemu.GetNbinsX() + 1):
-    new_bin_index = DYemu.FindBin(hDYemu.GetBinCenter(i))
-    DYemu.SetBinContent(new_bin_index, DYemu.GetBinContent(new_bin_index) + hDYemu.GetBinContent(i))
-
-
 fFake = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_fake.root".format(args.year),"r")
 hFake = ROOT.TH1D(fFake.Get(args.variable)) 
 Fake = ROOT.TH1D("Fake","new hist of Fake",var_used.nbins,var_used.binning)
@@ -176,9 +163,19 @@ for i in range(1, hData.GetNbinsX() + 1):
     new_bin_index = Fake.FindBin(hFake.GetBinCenter(i))
     Fake.SetBinContent(new_bin_index, Fake.GetBinContent(new_bin_index) + hFake.GetBinContent(i))
 
+fDYemu = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_DYemu.root".format(args.year),"r")
+hDYemu = ROOT.TH1D(fDYemu.Get(args.variable))
+DYemu = ROOT.TH1D("DYemu","new hist of DYemu",var_used.nbins,var_used.binning)
+for i in range(1, hDYemu.GetNbinsX() + 1):
+    new_bin_index = DYemu.FindBin(hDYemu.GetBinCenter(i))
+    DYemu.SetBinContent(new_bin_index, DYemu.GetBinContent(new_bin_index) + hDYemu.GetBinContent(i))
 
-#GGTT.Scale(1)
-
+ftop = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_top.root".format(args.year),"r")
+htop = ROOT.TH1D(ftop.Get(args.variable)) 
+top = ROOT.TH1D("top","new hist of top",var_used.nbins,var_used.binning)
+for i in range(1, htop.GetNbinsX() + 1):
+    new_bin_index = top.FindBin(hData.GetBinCenter(i))
+    top.SetBinContent(new_bin_index, top.GetBinContent(new_bin_index) + htop.GetBinContent(i))
 
 Data.GetXaxis().SetTitle("")
 Data.GetXaxis().SetTitleSize(0)
@@ -200,19 +197,19 @@ if args.variable=="nTrk":
     for k in range(1,2):
         Data.SetBinContent(k,0.0)
 print(type(top))
-top.SetFillColor(ROOT.TColor.GetColor("#4a4e4d"))
+
 VV.SetFillColor(ROOT.TColor.GetColor("#f6cd61"))
-DYemu.SetFillColor(ROOT.TColor.GetColor("#969df1"))
-#VV.SetFillColor(ROOT.TColor.GetColor("#ff8c94"))
 Fake.SetFillColor(ROOT.TColor.GetColor("#3da4ab"))
+DYemu.SetFillColor(ROOT.TColor.GetColor("#969df1"))
+top.SetFillColor(ROOT.TColor.GetColor("#4a4e4d"))
 
 Data.SetMarkerStyle(20)
 Data.SetMarkerSize(1)
-top.SetLineColor(1)
 #ZTT.SetLineColor(1)
 VV.SetLineColor(1)
-DYemu.SetLineColor(1)
 Fake.SetLineColor(1)
+DYemu.SetLineColor(1)
+top.SetLineColor(1)
 Data.SetLineColor(1)
 Data.SetLineWidth(2)
 
@@ -220,15 +217,15 @@ Data.SetLineWidth(2)
 #GGTT.SetLineWidth(3)
 
 stack=ROOT.THStack("stack","stack")
-stack.Add(top)
 stack.Add(VV)
-stack.Add(DYemu)
 stack.Add(Fake)
+stack.Add(DYemu)
+stack.Add(top)
 
-errorBand = top.Clone()
-errorBand.Add(VV)
-errorBand.Add(DYemu)
+errorBand = VV.Clone()
 errorBand.Add(Fake)
+errorBand.Add(DYemu)
+errorBand.Add(top)
 
 errorBand.SetMarkerSize(0)
 errorBand.SetFillColor(new_idx)
@@ -265,11 +262,11 @@ Data.Draw("esame")
 
 legende=make_legend()
 legende.AddEntry(Data,"Observed","elp")
-legende.AddEntry(top,"top","f")
+
 legende.AddEntry(VV,"VV","f")
-legende.AddEntry(DYemu,"Drell Yan","f")
-#legende.AddEntry(VV,"VV,single-t","f")
 legende.AddEntry(Fake,"Fake","f")
+legende.AddEntry(DYemu,"Drell Yan","f")
+legende.AddEntry(top,"top","f")
 #legende.AddEntry(GGTT,"Signal x 10","l")
 legende.AddEntry(errorBand,"Uncertainty","f")
 legende.Draw()

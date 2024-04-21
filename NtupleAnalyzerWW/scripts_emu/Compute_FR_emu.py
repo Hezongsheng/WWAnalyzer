@@ -1,14 +1,22 @@
+from ROOT import RDataFrame, TFile, TChain, TTree, TFile, TH1D, TLorentzVector, TCanvas, TH2D
+import numpy as numpy
+import sys
+from math import cos, sin, sqrt, pi
 import ROOT
-import argparse
+import time as timer
+from array import array
+ROOT.EnableImplicitMT();
+year = sys.argv[1]
+print("year is", year)
+#sample = sys.argv[2]
+#print("year is", year, "sample is", sample)
+
 ROOT.gStyle.SetOptStat(0)
 ROOT.gStyle.SetPaintTextFormat("1.2f")
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--year')
 
-options = parser.parse_args()
 postfixName=[""]
-
+samplelist = ["data","VV","DY","top"]
 
 def add_lumi(year):
     lowX=0.35
@@ -39,203 +47,277 @@ def add_CMS():
     lumi.SetTextColor(    1 )
     lumi.AddText("CMS")
     return lumi
+'''
+datalist = ["MuonEGA", "MuonEGB", "MuonEGC", "MuonEGD"]
+DYlist = ["DYemu"]
+toplist = ["TTToHadronic", "TTToSemiLeptonic", "TTTo2L2Nu_small", "ST_t_antitop", "ST_t_top", "ST_tW_antitop", "ST_tW_top"]
+VVlist = ["WZ3Q2L", "WZ3LNu", "VV2L2Nu_0", "ZZ4L"]
+ptlist = ["pte15to24_ptmu24to35", "pte15to24_ptmu35to45", "pte15to24_ptmugt45", "pte24to35_ptmu15to24", "pte24to35_ptmu24to35", "pte24to35_ptmu35to45", "pte24to35_ptmugt45", "pte35to45_ptmu15to24", "pte35to45_ptmu24to35", "pte35to45_ptmu35to45", "pte35to45_ptmugt45", "ptegt45_ptmu15to24", "ptegt45_ptmu24to35", "ptegt45_ptmu35to45", "ptegt45_ptmugt45"]
+Sisolist = ["OSnn", "OSna", "OSan", "OSaa", "SSnn", "SSna", "SSan", "SSaa"]
+
+for name in datalist:
+    for Siso in Sisolist:
+        for pt in ptlist:
+            df = RDataFrame("Events", "/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/{}{}_{}.root".format(year,name,Siso,pt)) 
+            df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
+            total_sum = df.Sum("allweight").GetValue()
+            print("ntuples_emu_{}_basicsel/{}_{}_{}.root".format(year,name,Siso,pt),total_sum)
+'''
 
 
 
+df_data = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/data.root".format(year))
+df_VV = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/VV.root".format(year))
+df_DY = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/DY.root".format(year))
+df_top = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/top.root".format(year))
+df_MC = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/MC.root".format(year))
+dflist = [df_data, df_VV, df_DY, df_top, df_MC]
+df_data = df_data.Define("allweight","1.0")
+df_VV = df_VV.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
+df_DY = df_DY.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
+df_top = df_top.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
+df_MC = df_MC.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
+'''
+for df in [df_VV, df_MC]:
+    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
+'''
 
 
+pte_edges = [15, 24, 35, 45, 55]
+ptmu_edges = [15, 24, 35, 45, 55]
+
+def create_hist(df_f):
+    h_f = df_f.Histo2D(("FR_weight", "FR_weight", len(pte_edges)-1, array('d', pte_edges), len(ptmu_edges)-1, array('d', ptmu_edges)), "elept", "mupt", "allweight")
+    return h_f
+
+def overflow2Dhist(h_FRweight):
+    for i in range (1,h_FRweight.GetNbinsY()+1):
+        overflow_ptmu = h_FRweight.GetBinContent(i,h_FRweight.GetNbinsY()) + h_FRweight.GetBinContent(i,h_FRweight.GetNbinsY()+1)
+        h_FRweight.SetBinContent(i,h_FRweight.GetNbinsY(),overflow_ptmu)
+    for i in range (1,h_FRweight.GetNbinsX()+1):
+        overflow_pte = h_FRweight.GetBinContent(h_FRweight.GetNbinsX(),i) + h_FRweight.GetBinContent(h_FRweight.GetNbinsX()+1,i)
+        h_FRweight.SetBinContent(h_FRweight.GetNbinsX(),i,overflow_pte)
+    overflow_ptemu = h_FRweight.GetBinContent(h_FRweight.GetNbinsX(),h_FRweight.GetNbinsY()) + h_FRweight.GetBinContent(h_FRweight.GetNbinsX()+1,h_FRweight.GetNbinsY()+1)
+    h_FRweight.SetBinContent(h_FRweight.GetNbinsX(), h_FRweight.GetNbinsY(), overflow_ptemu)
+    return h_FRweight
+
+def create_ratio(hist1, hist2):
+    hist_ratio = hist1.Clone("hist_ratio")
+
+    for i in range(1, hist_ratio.GetNbinsX() + 1):
+        for j in range(1, hist_ratio.GetNbinsY() + 1):
+            bin_content1 = hist1.GetBinContent(i, j)
+            bin_content2 = hist2.GetBinContent(i, j)
+            if bin_content2 != 0: 
+                ratio = bin_content1 / bin_content2
+            else:
+                ratio = 0  
+            hist_ratio.SetBinContent(i, j, ratio)
+            #print(i, j, ratio)
+    return hist_ratio
 
 
+def create_diff(hist1, hist2):
+    hist_diff = hist1.Clone("hist_ratio")
 
+    for i in range(1, hist_diff.GetNbinsX() + 1):
+        for j in range(1, hist_diff.GetNbinsY() + 1):
+            bin_content1 = hist1.GetBinContent(i, j)
+            bin_content2 = hist2.GetBinContent(i, j)
+            diff = bin_content1 - bin_content2
+            hist_diff.SetBinContent(i, j, diff)
+            #print(i, j, diff)
+    return hist_diff
 
-fVV=ROOT.TFile("output_emu_"+options.year+"/VV.root","r")
-fTop=ROOT.TFile("output_emu_"+options.year+"/top.root","r")
-fDY=ROOT.TFile("output_emu_"+options.year+"/DY.root","r")
-fData=ROOT.TFile("output_emu_"+options.year+"/MuonEG.root","r")
-fout=ROOT.TFile("emu_fr_"+options.year+".root","recreate")
+def check_hist(hist_ratio):
+    for i in range(1, hist_ratio.GetNbinsX() + 3):
+        for j in range(1, hist_ratio.GetNbinsY() + 3):
+            bin_content = hist_ratio.GetBinContent(i, j)
+            print(i, j, bin_content)
 
-h0iso=fData.Get("h_fr_iso")
-h0iso.Add(fVV.Get("h_fr_iso"),-1)
-h0iso.Add(fDY.Get("h_fr_iso"),-1)
-h0iso.Add(fTop.Get("h_fr_iso"),-1)
-h0anti=fData.Get("h_fr_anti")
-h0anti.Add(fVV.Get("h_fr_anti"),-1)
-h0anti.Add(fDY.Get("h_fr_anti"),-1)
-h0anti.Add(fTop.Get("h_fr_anti"),-1)
-h0iso.Divide(h0anti)
-fout.cd()
-h0iso.SetName("FR")
-h0iso.Write()
+'''
+def display_num2D(c_f,h2d_f):
+    for i in range(1,h2d_f.GetNbinsX()+1):
+        for j in range(1,h2d_f.GetNbinsY()+1):
+            content = h2d_f.GetBinContent(i, j)
+            xCenter = h2d_f.GetXaxis().GetBinCenter(i);
+            yCenter = h2d_f.GetYaxis().GetBinCenter(j);
 
-h0highiso=fData.Get("h_frhigh_iso")
-h0highiso.Add(fVV.Get("h_frhigh_iso"),-1)
-h0highiso.Add(fDY.Get("h_frhigh_iso"),-1)
-h0highiso.Add(fTop.Get("h_frhigh_iso"),-1)
-h0highanti=fData.Get("h_frhigh_anti")
-h0highanti.Add(fVV.Get("h_frhigh_anti"),-1)
-h0highanti.Add(fDY.Get("h_frhigh_anti"),-1)
-h0highanti.Add(fTop.Get("h_frhigh_anti"),-1)
-h0highiso.Divide(h0highanti)
+            label = f"{content:.2f}"
+            latex = ROOT.TLatex(xCenter, yCenter, label)
+            latex.SetTextSize(0.02)
+            latex.SetTextAlign(22)  # 居中对齐
+            latex.Draw()
+    c_f.Update()
+'''        
+    
 
-h0lowiso=fData.Get("h_frlow_iso")
-h0lowiso.Add(fVV.Get("h_frlow_iso"),-1)
-h0lowiso.Add(fDY.Get("h_frlow_iso"),-1)
-h0lowiso.Add(fTop.Get("h_frlow_iso"),-1)
-h0lowanti=fData.Get("h_frlow_anti")
-h0lowanti.Add(fVV.Get("h_frlow_anti"),-1)
-h0lowanti.Add(fDY.Get("h_frlow_anti"),-1)
-h0lowanti.Add(fTop.Get("h_frlow_anti"),-1)
-h0lowiso.Divide(h0lowanti)
+    
 
-
-h1iso=fData.Get("h_frnt_iso")
-h1iso.Add(fVV.Get("h_frnt_iso"),-1)
-h1iso.Add(fDY.Get("h_frnt_iso"),-1)
-h1iso.Add(fTop.Get("h_frnt_iso"),-1)
-
-h1anti=fData.Get("h_frnt_anti")
-h1anti.Add(fVV.Get("h_frnt_anti"),-1)
-h1anti.Add(fDY.Get("h_frnt_anti"),-1)
-h1anti.Add(fTop.Get("h_frnt_anti"),-1)
-
-h1iso.Divide(h1anti)
-average=h1iso.GetBinContent(1)
-for k in range(1,h1iso.GetSize()):
-    h1iso.SetBinContent(k,h1iso.GetBinContent(k)/average)
-fout.cd()
-h1iso.SetName("FRNT")
-h1iso.Write()
+fout = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FR_{}.root".format(year),"recreate")
 
 c=ROOT.TCanvas("canvas","",0,0,800,800)
 c.SetRightMargin(0.15)
+
+df_OSnaData = df_data.Filter("isOS").Filter("eleiso").Filter("muantiiso")
+h_OSnaData = create_hist(df_OSnaData)
+h_OSnaData = overflow2Dhist(h_OSnaData)
+df_OSnaMC = df_MC.Filter("isOS").Filter("eleiso").Filter("muantiiso")
+h_OSnaMC = create_hist(df_OSnaMC)
+#print("MC")
+#check_hist(h_OSnaMC)
+h_OSnaMC = overflow2Dhist(h_OSnaMC)
+#print("MC overflow")
+#check_hist(h_OSnaMC)
+df_OSnaVV = df_VV.Filter("isOS").Filter("eleiso").Filter("muantiiso")
+h_OSnaVV = create_hist(df_OSnaVV)
+#print("VV")
+#check_hist(h_OSnaVV)
+h_OSnaVV = overflow2Dhist(h_OSnaVV)
+#print("VV overflow")
+#check_hist(h_OSnaVV)
+#h_OSnaData.Add(h_OSnaVV, -1)
+df_OSnatop = df_top.Filter("isOS").Filter("eleiso").Filter("muantiiso")
+h_OSnatop = create_hist(df_OSnatop)
+#print("top")
+#check_hist(h_OSnatop)
+h_OSnatop = overflow2Dhist(h_OSnatop)
+#print("top overflow")
+#check_hist(h_OSnatop)
+#h_OSnaData.Add(h_OSnatop, -1)   
+df_OSnaDY = df_DY.Filter("isOS").Filter("eleiso").Filter("muantiiso")   
+h_OSnaDY = create_hist(df_OSnaDY)
+#print("DY")
+#check_hist(h_OSnaDY)
+h_OSnaDY = overflow2Dhist(h_OSnaDY)
+#print("DY overflow")
+#check_hist(h_OSnaDY)
+#h_OSnaData.Add(h_OSnaDY, -1)
+#h_OSna = create_diff(h_OSnaData,h_OSnaMC)
+#h_OSnaData1 = create_diff(h_OSnaData, h_OSnaVV)
+#h_OSnaData2 = create_diff(h_OSnaData1, h_OSnatop)
+#h_OSnaData3  = create_diff(h_OSnaData2, h_OSnaDY)
+h_OSnaData = create_diff(h_OSnaData, h_OSnaMC)
+
+df_SSnaData = df_data.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
+h_SSnaData = create_hist(df_SSnaData)
+h_SSnaData = overflow2Dhist(h_SSnaData)
+df_SSnaMC = df_MC.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
+h_SSnaMC = create_hist(df_SSnaMC)
+h_SSnaMC = overflow2Dhist(h_SSnaMC)
+df_SSnaVV = df_VV.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
+h_SSnaVV = create_hist(df_SSnaVV)
+h_SSnaVV = overflow2Dhist(h_SSnaVV)
+#h_SSnaData.Add(h_SSnaVV, -1)
+df_SSnatop = df_top.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
+h_SSnatop = create_hist(df_SSnatop)
+h_SSnatop = overflow2Dhist(h_SSnatop)
+#h_SSnaData.Add(h_SSnatop, -1)
+df_SSnaDY = df_DY.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
+h_SSnaDY = create_hist(df_SSnaDY)
+h_SSnaDY = overflow2Dhist(h_SSnaDY)
+#h_SSnaData.Add(h_SSnaDY, -1)
+#h_SSna = create_diff(h_SSnaData,h_SSnaMC)
+#h_na = create_ratio(h_OSna,h_SSna)
+#h_SSnaData1 = create_diff(h_SSnaData, h_SSnaVV)
+#h_SSnaData2 = create_diff(h_SSnaData1, h_SSnatop)
+#h_SSnaData3 = create_diff(h_SSnaData2, h_SSnaDY)
+h_SSnaData = create_diff(h_SSnaData, h_SSnaMC)
+h_na = h_OSnaData
+h_na.Divide(h_SSnaData)
+
+
 c.cd()
-h1iso.SetTitle("")
-h1iso.SetMarkerStyle(20)
-h1iso.SetMarkerColor(1)
-h1iso.SetLineColor(1)
-h1iso.GetXaxis().SetTitle("N_{tracks}")
-h1iso.GetYaxis().SetTitle("OS-to-SS ratio / average")
-h1iso.Draw("e0p")
-h1iso.GetXaxis().SetRangeUser(0,100)
-h1iso.SetMinimum(0.5)
-lumi=add_lumi(options.year)
+h_na.SetTitle("")
+h_na.SetName("OS-to-SS")
+h_na.SetMarkerStyle(20)
+h_na.SetMarkerColor(1)
+h_na.SetLineColor(1)
+h_na.GetXaxis().SetTitle("pt_{e}/GeV")
+h_na.GetYaxis().SetTitle("pt_{\mu}/GeV")
+h_na.GetZaxis().SetTitle("OS/SS")
+h_na.Draw("zcol text")
+lumi=add_lumi(year)
 lumi.Draw("same")
 cms=add_CMS()
 cms.Draw("same")
-total = ROOT.TF1( 'total', 'pol5', 0, 100 )
-total.SetLineColor( 2 )
-h1iso.Fit(total,'R')
-total.SetName("fit_frnt")
 
-hint = ROOT.TH1D("hint","Fitted Gaussian with .68 conf.band", 100, 0, 100);
-(ROOT.TVirtualFitter.GetFitter()).GetConfidenceIntervals(hint,0.68);
-hint.SetStats(False);
-hint.SetFillColor(ROOT.kCyan);
-hint.SetFillStyle(3001);
-hint.Draw("e3 same");
-print hint.GetBinError(1)/hint.GetBinContent(1);
+
+
+
+
 
 fout.cd()
-total.Write()
+h_na.Write()
+
 c.cd()
 c.Modified()
-c.SaveAs("plots_emu_"+options.year+"/frnt.pdf")
-c.SaveAs("plots_emu_"+options.year+"/frnt.png")
+c.SaveAs("OS-to-SS_"+year+".pdf")
+c.SaveAs("OS-to-SS_"+year+".png")
 
-h0iso.SetTitle("")
-h0iso.SetMarkerStyle(20)
-h0iso.SetMarkerColor(1)
-h0iso.SetLineColor(1)
-h0iso.GetXaxis().SetTitle("p_{T}(e) (GeV)")
-h0iso.GetYaxis().SetTitle("p_{T}(#mu) (GeV)")
-h0iso.GetZaxis().SetTitle("OS/SS ratio")
-h0iso.GetZaxis().SetRangeUser(1.2,2.2)
-h0iso.Draw("COLZH ERROR TEXT45")
-lumi=add_lumi(options.year)
+
+
+
+
+
+#Create the OS/SS in an state
+df_OSanData = df_data.Filter("isOS").Filter("eleantiiso").Filter("muiso")
+h_OSanData = create_hist(df_OSanData)
+h_OSanData = overflow2Dhist(h_OSanData)
+df_OSanMC = df_MC.Filter("isOS").Filter("eleantiiso").Filter("muiso")
+h_OSanMC = create_hist(df_OSanMC)
+h_OSanMC = overflow2Dhist(h_OSanMC)
+h_OSan = create_diff(h_OSanData,h_OSanMC)
+df_SSanData = df_data.Filter("!isOS").Filter("eleantiiso").Filter("muiso")
+h_SSanData = create_hist(df_SSanData)
+h_SSanData = overflow2Dhist(h_SSanData)
+df_SSanMC = df_MC.Filter("!isOS").Filter("eleantiiso").Filter("muiso")
+h_SSanMC = create_hist(df_SSanMC)
+h_SSanMC = overflow2Dhist(h_SSanMC)
+h_SSan = create_diff(h_SSanData,h_SSanMC)
+h_an = create_ratio(h_OSan,h_SSan)
+
+#Create the OS/SS in aa state
+df_OSaaData = df_data.Filter("isOS").Filter("eleantiiso").Filter("muantiiso")
+h_OSaaData = create_hist(df_OSaaData)
+h_OSaaData = overflow2Dhist(h_OSaaData)
+df_OSaaMC = df_MC.Filter("isOS").Filter("eleantiiso").Filter("muantiiso")
+h_OSaaMC = create_hist(df_OSaaMC)
+h_OSaaMC = overflow2Dhist(h_OSaaMC)
+h_OSaa = create_diff(h_OSaaData,h_OSaaMC)
+df_SSaaData = df_data.Filter("!isOS").Filter("eleantiiso").Filter("muantiiso")
+h_SSaaData = create_hist(df_SSaaData)
+h_SSaaData = overflow2Dhist(h_SSaaData)
+df_SSaaMC = df_MC.Filter("!isOS").Filter("eleantiiso").Filter("muantiiso")
+h_SSaaMC = create_hist(df_SSaaMC)
+h_SSaaMC = overflow2Dhist(h_SSaaMC)
+h_SSaa = create_diff(h_SSaaData,h_SSaaMC)
+h_aa = create_ratio(h_OSaa,h_SSaa)
+
+h_antimuCor = create_ratio(h_an, h_aa)
+
+c.cd()
+h_antimuCor.SetTitle("")
+h_antimuCor.SetName("antimuCor")
+h_antimuCor.SetMarkerStyle(20)
+h_antimuCor.SetMarkerColor(1)
+h_antimuCor.SetLineColor(1)
+h_antimuCor.GetXaxis().SetTitle("pt_{e}/GeV")
+h_antimuCor.GetYaxis().SetTitle("pt_{\mu}/GeV")
+h_antimuCor.GetZaxis().SetTitle("anto-#mu correction")
+h_antimuCor.Draw("zcol text")
+lumi=add_lumi(year)
 lumi.Draw("same")
 cms=add_CMS()
 cms.Draw("same")
-c.cd()
-c.Modified()
-c.SaveAs("plots_emu_"+options.year+"/fr2D.pdf")
-c.SaveAs("plots_emu_"+options.year+"/fr2D.png")
 
-h0highiso.SetTitle("")
-h0highiso.SetMarkerStyle(20)
-h0highiso.SetMarkerColor(1)
-h0highiso.SetLineColor(1)
-h0highiso.GetXaxis().SetTitle("p_{T}(e) (GeV)")
-h0highiso.GetYaxis().SetTitle("p_{T}(#mu) (GeV)")
-h0highiso.GetZaxis().SetTitle("OS/SS ratio")
-h0highiso.GetZaxis().SetRangeUser(1.2,2.2)
-h0highiso.Draw("COLZH ERROR TEXT45")
-lumi=add_lumi(options.year)
-lumi.Draw("same")
-cms=add_CMS()
-cms.Draw("same")
-c.cd()
-c.Modified()
-c.SaveAs("plots_emu_"+options.year+"/frhigh2D.pdf")
-c.SaveAs("plots_emu_"+options.year+"/frhigh2D.png")
-
-h0lowiso.SetTitle("")
-h0lowiso.SetMarkerStyle(20)
-h0lowiso.SetMarkerColor(1)
-h0lowiso.SetLineColor(1)
-h0lowiso.GetXaxis().SetTitle("p_{T}(e) (GeV)")
-h0lowiso.GetYaxis().SetTitle("p_{T}(#mu) (GeV)")
-h0lowiso.GetZaxis().SetTitle("OS/SS ratio")
-h0lowiso.GetZaxis().SetRangeUser(1.2,2.2)
-h0lowiso.Draw("COLZH ERROR TEXT45")
-lumi=add_lumi(options.year)
-lumi.Draw("same")
-cms=add_CMS()
-cms.Draw("same")
-c.cd()
-c.Modified()
-c.SaveAs("plots_emu_"+options.year+"/frlow2D.pdf")
-c.SaveAs("plots_emu_"+options.year+"/frlow2D.png")
-
-
-h2iso=fData.Get("h_frFP_iso")
-h2iso.Add(fVV.Get("h_frFP_iso"),-1)
-h2iso.Add(fDY.Get("h_frFP_iso"),-1)
-h2iso.Add(fTop.Get("h_frFP_iso"),-1)
-h2anti=fData.Get("h_frFP_anti")
-h2anti.Add(fVV.Get("h_frFP_anti"),-1)
-h2anti.Add(fDY.Get("h_frFP_anti"),-1)
-h2anti.Add(fTop.Get("h_frFP_anti"),-1)
-h2iso.Divide(h2anti)
-
-h3iso=fData.Get("h_frFF_iso")
-h3iso.Add(fVV.Get("h_frFF_iso"),-1)
-h3iso.Add(fDY.Get("h_frFF_iso"),-1)
-h3iso.Add(fTop.Get("h_frFF_iso"),-1)
-h3anti=fData.Get("h_frFF_anti")
-h3anti.Add(fVV.Get("h_frFF_anti"),-1)
-h3anti.Add(fDY.Get("h_frFF_anti"),-1)
-h3anti.Add(fTop.Get("h_frFF_anti"),-1)
-h3iso.Divide(h3anti)
-
-h2iso.Divide(h3iso)
 fout.cd()
-h2iso.SetName("FRantimu")
-h2iso.Write()
+h_antimuCor.Write()
 
-h2iso.SetTitle("")
-h2iso.SetMarkerStyle(20)
-h2iso.SetMarkerColor(1)
-h2iso.SetLineColor(1)
-h2iso.GetXaxis().SetTitle("p_{T}(e) (GeV)")
-h2iso.GetYaxis().SetTitle("p_{T}(#mu) (GeV)")
-h2iso.GetZaxis().SetTitle("anti-#mu correction")
-h2iso.GetZaxis().SetRangeUser(0.9,2.0)
-h2iso.Draw("COLZH ERROR TEXT45")
-lumi.Draw("same")
-cms.Draw("same")
 c.cd()
 c.Modified()
-c.SaveAs("plots_emu_"+options.year+"/frantimu.pdf")
-c.SaveAs("plots_emu_"+options.year+"/frantimu.png")
+c.SaveAs("antimuCor_"+year+".pdf")
+c.SaveAs("antimuCor_"+year+".png")
+
 
 
