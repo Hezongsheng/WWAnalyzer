@@ -225,7 +225,31 @@ float Get_ntHSweight(int ntracksHS, float gen_aco, string year){
 
 
 
+FR_weight::FR_weight(string year){
+    yearconf = year;
+    if (year == "2018"){
+        TFile* f_FR = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FR_2018.root","read");
+        OStoSS = (TH2D*) f_FR->Get("OS-to-SS");
+        antimuCor = (TH2D*) f_FR->Get("antimuCor");
+    } 
+    else{
+        cout<<"wrong year configuration"<<endl;
+    }
+}
 
+FR_weight::FR_weight(){
+    
+}
+FR_weight FR_weight2018("2018");
+map<string, FR_weight> FR_weightmap = {
+    {"2018", FR_weight2018}
+};  
+
+float GetFRweight(float elept, float mupt, string year){
+    float FR_weight = 1.0;
+    FR_weight = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt))*FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt));
+    return FR_weight;
+}
 
 
 

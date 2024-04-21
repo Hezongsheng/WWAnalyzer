@@ -50,4 +50,15 @@ float Get_Aweight(float gen_aco, int nZGenCand, Vec_t &ZGenCand_pt, float lep1pt
 ROOT::RVec<float> Get_BScor_ditaudz( Vec_t &PF_dz, ROOT::RVec<int> &PF_isMatchedToGenHS,float PV_z, float zvtxll,string year );
 float Get_ntpuweight(int ntpu, float zvtxll,string year);
 float Get_ntHSweight(int ntracksHS, float gen_aco,string year);
+
+class FR_weight{
+public:
+    string yearconf;
+    TH2D* OStoSS;
+    TH2D* antimuCor;
+    FR_weight();
+    FR_weight(string year);
+};
+
+float GetFRweight(float elept, float mupt, string year);
 #endif

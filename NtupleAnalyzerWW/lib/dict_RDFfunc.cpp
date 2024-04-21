@@ -38,6 +38,7 @@
 #include "basic_sel.h"
 #include "GetPFTrk.h"
 #include "Correction.h"
+#include "myHelper.h"
 
 // Header files passed via #pragma extra_include
 
@@ -225,6 +226,51 @@ namespace ROOT {
 } // end of namespace ROOT
 
 namespace ROOT {
+   static TClass *FR_weight_Dictionary();
+   static void FR_weight_TClassManip(TClass*);
+   static void *new_FR_weight(void *p = nullptr);
+   static void *newArray_FR_weight(Long_t size, void *p);
+   static void delete_FR_weight(void *p);
+   static void deleteArray_FR_weight(void *p);
+   static void destruct_FR_weight(void *p);
+
+   // Function generating the singleton type initializer
+   static TGenericClassInfo *GenerateInitInstanceLocal(const ::FR_weight*)
+   {
+      ::FR_weight *ptr = nullptr;
+      static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::FR_weight));
+      static ::ROOT::TGenericClassInfo 
+         instance("FR_weight", "Correction.h", 54,
+                  typeid(::FR_weight), ::ROOT::Internal::DefineBehavior(ptr, ptr),
+                  &FR_weight_Dictionary, isa_proxy, 0,
+                  sizeof(::FR_weight) );
+      instance.SetNew(&new_FR_weight);
+      instance.SetNewArray(&newArray_FR_weight);
+      instance.SetDelete(&delete_FR_weight);
+      instance.SetDeleteArray(&deleteArray_FR_weight);
+      instance.SetDestructor(&destruct_FR_weight);
+      return &instance;
+   }
+   TGenericClassInfo *GenerateInitInstance(const ::FR_weight*)
+   {
+      return GenerateInitInstanceLocal((::FR_weight*)nullptr);
+   }
+   // Static variable to force the class initialization
+   static ::ROOT::TGenericClassInfo *_R__UNIQUE_DICT_(Init) = GenerateInitInstanceLocal((const ::FR_weight*)nullptr); R__UseDummy(_R__UNIQUE_DICT_(Init));
+
+   // Dictionary for non-ClassDef classes
+   static TClass *FR_weight_Dictionary() {
+      TClass* theClass =::ROOT::GenerateInitInstanceLocal((const ::FR_weight*)nullptr)->GetClass();
+      FR_weight_TClassManip(theClass);
+   return theClass;
+   }
+
+   static void FR_weight_TClassManip(TClass* ){
+   }
+
+} // end of namespace ROOT
+
+namespace ROOT {
    // Wrappers around operator new
    static void *new_musf(void *p) {
       return  p ? new(p) ::musf : new ::musf;
@@ -308,12 +354,34 @@ namespace ROOT {
    }
 } // end of namespace ROOT for class ::spe_cor
 
+namespace ROOT {
+   // Wrappers around operator new
+   static void *new_FR_weight(void *p) {
+      return  p ? new(p) ::FR_weight : new ::FR_weight;
+   }
+   static void *newArray_FR_weight(Long_t nElements, void *p) {
+      return p ? new(p) ::FR_weight[nElements] : new ::FR_weight[nElements];
+   }
+   // Wrapper around operator delete
+   static void delete_FR_weight(void *p) {
+      delete ((::FR_weight*)p);
+   }
+   static void deleteArray_FR_weight(void *p) {
+      delete [] ((::FR_weight*)p);
+   }
+   static void destruct_FR_weight(void *p) {
+      typedef ::FR_weight current_t;
+      ((current_t*)p)->~current_t();
+   }
+} // end of namespace ROOT for class ::FR_weight
+
 namespace {
   void TriggerDictionaryInitialization_dict_RDFfunc_Impl() {
     static const char* headers[] = {
 "basic_sel.h",
 "GetPFTrk.h",
 "Correction.h",
+"myHelper.h",
 nullptr
     };
     static const char* includePaths[] = {
@@ -331,6 +399,7 @@ class __attribute__((annotate("$clingAutoload$basic_sel.h")))  musf;
 class __attribute__((annotate("$clingAutoload$basic_sel.h")))  elesf;
 class __attribute__((annotate("$clingAutoload$basic_sel.h")))  Getxsw_W;
 class __attribute__((annotate("$clingAutoload$Correction.h")))  spe_cor;
+class __attribute__((annotate("$clingAutoload$Correction.h")))  FR_weight;
 )DICTFWDDCLS";
     static const char* payloadCode = R"DICTPAYLOAD(
 #line 1 "dict_RDFfunc dictionary payload"
@@ -341,11 +410,14 @@ class __attribute__((annotate("$clingAutoload$Correction.h")))  spe_cor;
 #include "basic_sel.h"
 #include "GetPFTrk.h"
 #include "Correction.h"
+#include "myHelper.h"
 
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
     static const char* classesHeaders[] = {
+"FR_weight", payloadCode, "@",
 "Getxsw_W", payloadCode, "@",
+"WriteHistToFileEMu", payloadCode, "@",
 "elesf", payloadCode, "@",
 "musf", payloadCode, "@",
 "spe_cor", payloadCode, "@",
