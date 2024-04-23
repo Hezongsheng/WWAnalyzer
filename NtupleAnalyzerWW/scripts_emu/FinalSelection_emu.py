@@ -193,7 +193,7 @@ df_sel = df_var.Filter("fabs(eleeta)<2.5 && fabs(mueta)<2.4").Filter("LepCand_mu
 if name=="exclusive" or name=="inclusive":
     df_sel = df_sel.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==1").Define("FRweight","GetFRweight(my_ele.Pt(), my_mu.Pt(), \"{}\")".format(year))
 elif name=="FR":
-    df_sel = df_sel.Define("muiso","LepCand_muonIso[muindex]<0.20").Define("muantiiso","LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Define("eleiso","LepCand_eleMVAiso80[eleindex]==1").Define("eleantiiso","LepCand_eleMVAiso80[eleindex]==0")
+    df_sel = df_sel.Define("muiso","LepCand_muonIso[muindex]<0.20").Define("muantiiso","LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Define("eleiso","LepCand_eleMVAiso80[eleindex]==1").Define("eleantiiso","LepCand_eleMVAiso80[eleindex]==0 && LepCand_eleMVAisoL[eleindex]==1")
 
 
 #Add Trigger 
@@ -297,7 +297,7 @@ else:
     if (category == "DY" or category == "VV"):
         df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
             .Define("nHStrk","Sum(HStrkcut)")\
-            .Define("nHStrkweight","Get_ntHSweight(1,nHStrk,genAco,\"{}\")".format(year))
+            .Define("nHStrkweight","Get_ntHSweight(nHStrk,genAco,\"{}\")".format(year))
     else:
         df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
             .Define("nHStrk","Sum(HStrkcut)")\

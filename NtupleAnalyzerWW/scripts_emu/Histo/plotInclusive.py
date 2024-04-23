@@ -90,16 +90,16 @@ parser.add_argument('--variable', '-v', default=None, help='Variable to draw')
 args = parser.parse_args()
 
 
-mvis = variable("mvis","m_{vis}",int(31),np.array([15,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300,400,500],dtype=float))
+mvis = variable("mvis","m_{vis}",int(21),np.array([15,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,300,500],dtype=float))
 elept = variable("elept","e p_{T}",int(39),np.array([20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,84,88,92,96,100,105,110,115,120],dtype=float))
 mupt = variable("mupt","#mu p_{T}",int(39),np.array([20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,84,88,92,96,100,105,110,115,120],dtype=float))
 Aco = variable("Acopl","acoplanarity",int(40),np.arange(0,1.025,0.025,dtype=float))
 mtranse = variable("mtrans","m_{T}(#mu,MET)",int(36),np.arange(0,185,5,dtype=float))
 nTrk = variable("nTrk","N_{tracks}",int(50),np.arange(0,102,2,dtype=float))
 MET = variable("MET_pt","MET",int(19),np.array([0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,80,90,100,110,120],dtype=float))
-eleeta = variable("eleeta","e #eta", int(52), np.arange(-2.5,2.8,0.1,dtype=float))
-mueta = variable("mueta","#mu #eta", int(52), np.arange(-2.5,2.8,0.1,dtype=float))
-ptemu = variable("ptemu","pt_{e#mu}",int(56),np.arange(15,305,5,dtype=float))
+eleeta = variable("eleeta","e #eta", int(50), np.arange(-2.5,2.6,0.1,dtype=float))
+mueta = variable("mueta","#mu #eta", int(50), np.arange(-2.5,2.6,0.1,dtype=float))
+ptemu = variable("ptemu","pt_{e#mu}",int(33),np.arange(15,185,5,dtype=float))
 
 variablelist = [mvis,elept,mupt,Aco,mtranse,nTrk,MET,eleeta,mueta,ptemu]
 

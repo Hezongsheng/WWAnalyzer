@@ -13,9 +13,9 @@ print("year is", year, "sample is", sample, "SS")
 
 df = RDataFrame("Events","/eos/user/z/zohe/WWdata/inclusive/ntuples_emu_{}_basicsel/{}.root".format(year,sample))
 if "MuonEG" in sample:
-    df = df.Define("allweight","1.0")
+    df = df.Define("allweight","FRweight")
 else:
-    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
+    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*FRweight")
     
 df = df.Filter("isOS==0")
 h_mvis = df.Histo1D(("mvis","mvis",485,15,500),"mvis","allweight")

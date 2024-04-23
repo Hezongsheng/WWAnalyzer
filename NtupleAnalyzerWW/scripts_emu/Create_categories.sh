@@ -1,13 +1,13 @@
-#python FinalSelection_emu.py 2018 MuonEGA FR data
-#python FinalSelection_emu.py 2018 MuonEGB FR data
-#python FinalSelection_emu.py 2018 MuonEGC FR data
-#python FinalSelection_emu.py 2018 MuonEGD FR data
-#hadd -f /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/data.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MuonEGA.root    /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MuonEGB.root    /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MuonEGC.root    /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MuonEGD.root
+python FinalSelection_emu.py 2018 MuonEGA FR data
+python FinalSelection_emu.py 2018 MuonEGB FR data
+python FinalSelection_emu.py 2018 MuonEGC FR data
+python FinalSelection_emu.py 2018 MuonEGD FR data
+hadd -f /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/data.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MuonEGA.root    /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MuonEGB.root    /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MuonEGC.root    /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MuonEGD.root
 
 
 
-#python FinalSelection_emu.py 2018 DYemu FR DY
-#mv /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/DYemu.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/DY.root
+python FinalSelection_emu.py 2018 DYemu FR DY
+mv /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/DYemu.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/DY.root
 
 
 
@@ -22,11 +22,11 @@ hadd -f /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/top.root    /eos/us
 
 
 
-#python FinalSelection_emu.py 2018 WZ2Q2L FR VV
-#python FinalSelection_emu.py 2018 WZ3LNu FR VV
-#python FinalSelection_emu.py 2018 VV2L2Nu_0 FR VV
-#python FinalSelection_emu.py 2018 ZZ4L FR VV
-#hadd -f /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/VV.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/WZ2Q2L.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/WZ3LNu.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/VV2L2Nu_0.root    /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/ZZ4L.root
+python FinalSelection_emu.py 2018 WZ2Q2L FR VV
+python FinalSelection_emu.py 2018 WZ3LNu FR VV
+python FinalSelection_emu.py 2018 VV2L2Nu_0 FR VV
+python FinalSelection_emu.py 2018 ZZ4L FR VV
+hadd -f /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/VV.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/WZ2Q2L.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/WZ3LNu.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/VV2L2Nu_0.root    /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/ZZ4L.root
 
 hadd -f /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/MC.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/DY.root /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/VV.root  /eos/user/z/zohe/WWdata/FR/ntuples_emu_2018_basicsel/top.root
 

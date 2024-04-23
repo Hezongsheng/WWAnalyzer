@@ -247,6 +247,8 @@ map<string, FR_weight> FR_weightmap = {
 
 float GetFRweight(float elept, float mupt, string year){
     float FR_weight = 1.0;
+    if (elept > 55) elept = 50;
+    if (mupt > 55) mupt = 50;
     FR_weight = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt))*FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt));
     return FR_weight;
 }
