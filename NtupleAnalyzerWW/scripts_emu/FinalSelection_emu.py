@@ -302,6 +302,9 @@ else:
         df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
             .Define("nHStrk","Sum(HStrkcut)")\
             .Define("nHStrkweight","float(1)")
+
+if name == "exclusive":
+    df = df.Filter("nTrk<=2")
     
 uncertainties = ["","_CMS_pileup_yearDown","_CMS_pileup_yearUp","_CMS_emutrg_lowmuhighe_systDown","_CMS_emutrg_lowmuhighe_systUp","_CMS_emutrg_highmulowe_systDown","_CMS_emutrg_highmulowe_systUp","_CMS_emutrg_highmuhighe_systDown","_CMS_emutrg_highmuhighe_systUp","_CMS_elasticRescalingDown","_CMS_elasticRescalingUp","_CMS_L1PrefiringDown","_CMS_L1PrefiringUp","_CMS_muId_systDown","_CMS_muId_systUp","_CMS_muId_stat_yearDown","_CMS_muId_stat_yearUp","_CMS_muIso_systDown","_CMS_muIso_systUp","_CMS_muIso_stat_yearDown","_CMS_muIso_stat_yearUp","_CMS_elId_systDown","_CMS_elId_systUp","_CMS_ISRDown","_CMS_ISRUp","_CMS_FSRDown","_CMS_FSRUp","_CMS_PDFDown","_CMS_PDFUp","_CMS_muR0p5_muF0p5","_CMS_muRDown","_CMS_muFDown","_CMS_muFUp","_CMS_muRUp","_CMS_muR2p0_muF2p0"]
 
@@ -367,8 +370,8 @@ if name=="FR":
 if name=="exclusive" or name=="inclusive":
     columns.push_back("FRweight")
 
-#if ("Ctb" in sample):
-#    columns.push_back("TauG2Weights_ceBRe_0p0")
+if ("GGToTauTau" in sample):
+    columns.push_back("TauG2Weights_ceBRe_0p0")
 
 '''
 def save_df_file(df_f, cat, file_f, columns_f):

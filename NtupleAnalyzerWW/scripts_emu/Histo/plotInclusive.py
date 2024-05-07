@@ -7,6 +7,10 @@ import argparse
 from array import array
 import numpy as np
 #from pyFunc.gethisto_SR_mutau import variable
+year = sys.argv[1]
+variables = sys.argv[2]
+name = sys.argv[3]
+
 
 class variable:
     def __init__(self, name, title, nbins, binning):
@@ -33,6 +37,22 @@ def add_lumi(year):
     if (year=="2017"): lumi.AddText("2017, 41 fb^{-1} (13 TeV)")
     if (year=="2016"): lumi.AddText("2016, 36 fb^{-1} (13 TeV)")
     return lumi
+
+def add_nTrk(name):
+    lowX=0.2
+    lowY=0.835
+    lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.30, lowY+0.16, "NDC")
+    lumi.SetBorderSize(   0 )
+    lumi.SetFillStyle(    0 )
+    lumi.SetTextAlign(   12 )
+    lumi.SetTextColor(    1 )
+    lumi.SetTextSize(0.1)
+    lumi.SetTextFont (   42 )
+    if (name=="exclusive0"): lumi.AddText("nTrk=0")
+    elif (name=="exclusive1"): lumi.AddText("nTrk=1")
+    return lumi
+
+
 
 def add_CMS():
     lowX=0.21
@@ -83,11 +103,13 @@ def make_legend2():
     
 ROOT.gStyle.SetOptStat(0)
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--year', '-y', default=None, help='Year to draw')
+#parser = argparse.ArgumentParser()
+#parser.add_argument('--year', '-y', default=None, help='Year to draw')
 #parser.add_argument('--channel', '-c', default=None, help='channel to draw')
-parser.add_argument('--variable', '-v', default=None, help='Variable to draw')
-args = parser.parse_args()
+#parser.add_argument('--variable', '-v', default=None, help='Variable to draw')
+#parser.add_argument('--name', '-n', default=None, help='Name of the plot')
+#args = parser.parse_args()
+
 
 
 mvis = variable("mvis","m_{vis}",int(21),np.array([15,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,300,500],dtype=float))
@@ -105,7 +127,7 @@ variablelist = [mvis,elept,mupt,Aco,mtranse,nTrk,MET,eleeta,mueta,ptemu]
 
 title="m_{vis}"
 for var in variablelist:
-    if args.variable == var.name:
+    if variables == var.name:
         title = var.title
         var_used = var
         
@@ -137,8 +159,8 @@ VV.Add(ST.Clone())
 #VV.Add(W.Clone())
 Fake=file.Get(args.channel).Get("Fake")
 '''
-fData = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_MuonEG.root".format(args.year),"r")
-hData = ROOT.TH1D(fData.Get(args.variable)) 
+fData = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_MuonEG.root".format(year),"r")
+hData = ROOT.TH1D(fData.Get(variables)) 
 Data = ROOT.TH1D("Data","new hist of Data",var_used.nbins,var_used.binning)
 for i in range(1, hData.GetNbinsX() + 1):
     new_bin_index = Data.FindBin(hData.GetBinCenter(i))
@@ -149,37 +171,84 @@ for i in range(1, hData.GetNbinsX() + 1):
 
 
 
-fVV = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_VV.root".format(args.year),"r")
-hVV = ROOT.TH1D(fVV.Get(args.variable)) 
+fVV = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_VV.root".format(year),"r")
+hVV = ROOT.TH1D(fVV.Get(variables)) 
 VV = ROOT.TH1D("VV","new hist of VV",var_used.nbins,var_used.binning)
 for i in range(1, hVV.GetNbinsX() + 1):
     new_bin_index = VV.FindBin(hVV.GetBinCenter(i))
     VV.SetBinContent(new_bin_index, VV.GetBinContent(new_bin_index) + hVV.GetBinContent(i))
 
-fFake = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_fake.root".format(args.year),"r")
-hFake = ROOT.TH1D(fFake.Get(args.variable)) 
+fFake = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_fake.root".format(year),"r")
+hFake = ROOT.TH1D(fFake.Get(variables)) 
 Fake = ROOT.TH1D("Fake","new hist of Fake",var_used.nbins,var_used.binning)
 for i in range(1, hData.GetNbinsX() + 1):
     new_bin_index = Fake.FindBin(hFake.GetBinCenter(i))
     Fake.SetBinContent(new_bin_index, Fake.GetBinContent(new_bin_index) + hFake.GetBinContent(i))
 
-fDYemu = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_DYemu.root".format(args.year),"r")
-hDYemu = ROOT.TH1D(fDYemu.Get(args.variable))
+fDYemu = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_DYemu.root".format(year),"r")
+hDYemu = ROOT.TH1D(fDYemu.Get(variables))
 DYemu = ROOT.TH1D("DYemu","new hist of DYemu",var_used.nbins,var_used.binning)
 for i in range(1, hDYemu.GetNbinsX() + 1):
     new_bin_index = DYemu.FindBin(hDYemu.GetBinCenter(i))
     DYemu.SetBinContent(new_bin_index, DYemu.GetBinContent(new_bin_index) + hDYemu.GetBinContent(i))
 
-ftop = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_top.root".format(args.year),"r")
-htop = ROOT.TH1D(ftop.Get(args.variable)) 
+ftop = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_top.root".format(year),"r")
+htop = ROOT.TH1D(ftop.Get(variables)) 
 top = ROOT.TH1D("top","new hist of top",var_used.nbins,var_used.binning)
 for i in range(1, htop.GetNbinsX() + 1):
     new_bin_index = top.FindBin(hData.GetBinCenter(i))
     top.SetBinContent(new_bin_index, top.GetBinContent(new_bin_index) + htop.GetBinContent(i))
 
-Data.GetXaxis().SetTitle("")
-Data.GetXaxis().SetTitleSize(0)
-Data.GetXaxis().SetNdivisions(505)
+fGG2WW = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_GGToWW.root".format(year),"r")
+hGG2WW = ROOT.TH1D(fGG2WW.Get(variables)) 
+GG2WW = ROOT.TH1D("GG2WW","new hist of GG2WW",var_used.nbins,var_used.binning)
+for i in range(1, hGG2WW.GetNbinsX() + 1):
+    new_bin_index = GG2WW.FindBin(hData.GetBinCenter(i))
+    GG2WW.SetBinContent(new_bin_index, GG2WW.GetBinContent(new_bin_index) + hGG2WW.GetBinContent(i))
+
+if "exclusive" in name:
+    fGG2TauTau = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_GGToTauTau_Ctb20.root".format(year),"r")
+    hGG2TauTau = ROOT.TH1D(fGG2TauTau.Get(variables)) 
+    GG2TauTau = ROOT.TH1D("GG2TauTau","new hist of GG2TauTau",var_used.nbins,var_used.binning)
+    for i in range(1, hGG2TauTau.GetNbinsX() + 1):
+        new_bin_index = GG2TauTau.FindBin(hData.GetBinCenter(i))
+        GG2TauTau.SetBinContent(new_bin_index, GG2TauTau.GetBinContent(new_bin_index) + hGG2TauTau.GetBinContent(i))
+    nGG2WW = 0
+    for i in range(1,GG2WW.GetSize()+1):
+        nGG2WW += GG2WW.GetBinContent(i)
+    print("nGG2WW", nGG2WW)
+    nGG2TauTau = 0
+    for i in range(1,GG2TauTau.GetSize()+1):
+        nGG2TauTau += GG2TauTau.GetBinContent(i)
+    print("nGG2TauTau", nGG2TauTau)
+    nVV = 0
+    for i in range(1,VV.GetSize()+1):
+            nVV += VV.GetBinContent(i)
+    print("nVV", nVV)
+    nFake = 0
+    for i in range(1,Fake.GetSize()+1):
+        nFake += Fake.GetBinContent(i)
+    print("nFake", nFake)
+    nDYemu = 0
+    for i in range(1,DYemu.GetSize()+1):
+        nDYemu += DYemu.GetBinContent(i)
+    print("nDYemu", nDYemu)
+    ntop = 0
+    for i in range(1,top.GetSize()+1):
+        ntop += top.GetBinContent(i)
+    print("ntop", ntop) 
+
+if name=="inclusive":
+    Data.GetXaxis().SetTitle("")
+    Data.GetXaxis().SetTitleSize(0)
+    Data.GetXaxis().SetNdivisions(505)
+elif "exclusive" in name:
+    Data.GetXaxis().SetTitle(title)
+    Data.GetXaxis().SetNdivisions(505)
+    Data.GetXaxis().SetTitleSize(0.075)
+    Data.GetXaxis().SetTitleOffset(0.6)
+    Data.GetXaxis().SetLabelSize(0.06)
+    Data.GetXaxis().SetTitleFont(42)
 
 Data.GetYaxis().SetLabelFont(42)
 Data.GetYaxis().SetLabelOffset(0.01)
@@ -190,21 +259,25 @@ Data.SetTitle("")
 Data.GetYaxis().SetTitle("Events/bin")
 Data.SetMinimum(0.1)
 
-
-
 #blind
-if args.variable=="nTrk":
-    for k in range(1,2):
+if "exclusive" in name:
+    for k in range(1,Data.GetSize()+1):
         Data.SetBinContent(k,0.0)
-print(type(top))
+
+
+Data.SetMarkerStyle(20)
+Data.SetMarkerSize(1)
+
 
 VV.SetFillColor(ROOT.TColor.GetColor("#f6cd61"))
 Fake.SetFillColor(ROOT.TColor.GetColor("#3da4ab"))
 DYemu.SetFillColor(ROOT.TColor.GetColor("#969df1"))
 top.SetFillColor(ROOT.TColor.GetColor("#4a4e4d"))
+GG2WW.SetFillColor(ROOT.TColor.GetColor("#ff0000"))
+if "exclusive" in name:
+    GG2TauTau.SetFillColor(ROOT.TColor.GetColor("#00ff00"))
 
-Data.SetMarkerStyle(20)
-Data.SetMarkerSize(1)
+
 #ZTT.SetLineColor(1)
 VV.SetLineColor(1)
 Fake.SetLineColor(1)
@@ -217,12 +290,23 @@ Data.SetLineWidth(2)
 #GGTT.SetLineWidth(3)
 
 stack=ROOT.THStack("stack","stack")
+stack.Add(GG2WW)
+if "exclusive" in name:
+    stack.Add(GG2TauTau)
 stack.Add(VV)
 stack.Add(Fake)
 stack.Add(DYemu)
 stack.Add(top)
 
+    
+
+
+
+
 errorBand = VV.Clone()
+errorBand.Add(GG2WW)
+if "exclusive" in name:
+    errorBand.Add(GG2TauTau)
 errorBand.Add(Fake)
 errorBand.Add(DYemu)
 errorBand.Add(top)
@@ -233,6 +317,8 @@ errorBand.SetFillStyle(3001)
 errorBand.SetLineWidth(1)
 
 pad1 = ROOT.TPad("pad1","pad1",0,0.35,1,1)
+#if "exclusive" in name:
+#    pad1.SetPad(0,0,1,1)
 pad1.Draw()
 pad1.cd()
 pad1.SetFillColor(0)
@@ -242,15 +328,18 @@ pad1.SetTickx(1)
 pad1.SetTicky(1)
 pad1.SetLeftMargin(0.18)
 pad1.SetRightMargin(0.05)
-pad1.SetTopMargin(0.122)
-pad1.SetBottomMargin(0.026)
+if name=="inclusive":
+    pad1.SetTopMargin(0.122)
+    pad1.SetBottomMargin(0.026)
 pad1.SetFrameFillStyle(0)
 pad1.SetFrameLineStyle(0)
 pad1.SetFrameBorderMode(0)
 pad1.SetFrameBorderSize(10)
 #pad1.SetLogy()
 
-Data.GetXaxis().SetLabelSize(0)
+
+if name=="inclusive":
+    Data.GetXaxis().SetLabelSize(0)
 Data.SetMaximum(max(Data.GetMaximum()*1.5,errorBand.GetMaximum()*1.5))
 Data.SetMinimum(0.1)
 Data.Draw("e")
@@ -258,78 +347,94 @@ stack.Draw("histsame")
 errorBand.Draw("e2same")
 Data.Draw("esame")
 
+    
+    
+
+
+
 #GGTT.Draw("histsame")
 
 legende=make_legend()
-legende.AddEntry(Data,"Observed","elp")
-
+if name=="inclusive":
+    legende.AddEntry(Data,"Observed","elp")
+    legende.AddEntry(GG2WW,"Signal(GG#rightarrow WW)x1e3","f")
+elif "exclusive" in name:
+    legende.AddEntry(GG2WW,"Signal(GG#rightarrow WW)","f")
+    legende.AddEntry(GG2TauTau,"GG#rightarrow #tau#tau","f")
 legende.AddEntry(VV,"VV","f")
 legende.AddEntry(Fake,"Fake","f")
 legende.AddEntry(DYemu,"Drell Yan","f")
 legende.AddEntry(top,"top","f")
-#legende.AddEntry(GGTT,"Signal x 10","l")
 legende.AddEntry(errorBand,"Uncertainty","f")
 legende.Draw()
 
-l1=add_lumi(args.year)
+l1=add_lumi(year)
 l1.Draw("same")
 l2=add_CMS()
 l2.Draw("same")
 l3=add_Preliminary()
 l3.Draw("same")
-
+if "exclusive" in name:
+    l4=add_nTrk(name)
+    l4.Draw("same")
 pad1.RedrawAxis()
+if name=="inclusive":
+    
+    c.cd()
+    pad2 = ROOT.TPad("pad2","pad2",0,0,1,0.35);
+    pad2.SetTopMargin(0.05);
+    pad2.SetBottomMargin(0.35);
+    pad2.SetLeftMargin(0.18);
+    pad2.SetRightMargin(0.05);
+    pad2.SetTickx(1)
+    pad2.SetTicky(1)
+    pad2.SetGridx()
+    pad2.SetGridy()
+    pad2.Draw()
+    pad2.cd()
+    h1=Data.Clone()
+    h1.SetMaximum(1.3)#FIXME(3)
+    h1.SetMinimum(0.7)#FIXME(0.5)
+    h1.SetMarkerStyle(20)
+    h3=errorBand.Clone()
+    hwoE=errorBand.Clone()
 
-c.cd()
-pad2 = ROOT.TPad("pad2","pad2",0,0,1,0.35);
-pad2.SetTopMargin(0.05);
-pad2.SetBottomMargin(0.35);
-pad2.SetLeftMargin(0.18);
-pad2.SetRightMargin(0.05);
-pad2.SetTickx(1)
-pad2.SetTicky(1)
-pad2.SetGridx()
-pad2.SetGridy()
-pad2.Draw()
-pad2.cd()
-h1=Data.Clone()
-h1.SetMaximum(1.3)#FIXME(3)
-h1.SetMinimum(0.7)#FIXME(0.5)
-h1.SetMarkerStyle(20)
-h3=errorBand.Clone()
-hwoE=errorBand.Clone()
+    for iii in range (1,hwoE.GetSize()-1):
+        hwoE.SetBinError(iii,0)
+    h3.Sumw2()
+    h1.Sumw2()
+    h1.SetStats(0)
+    h1.Divide(hwoE)
+    h3.Divide(hwoE)
+    h1.GetXaxis().SetTitle(title)
+    h1.GetXaxis().SetLabelSize(0.08)
+    h1.GetYaxis().SetLabelSize(0.08)
+    h1.GetYaxis().SetTitle("Obs./Exp.")
+    h1.GetXaxis().SetNdivisions(505)
+    h1.GetYaxis().SetNdivisions(5)
 
-for iii in range (1,hwoE.GetSize()-1):
-    hwoE.SetBinError(iii,0)
-h3.Sumw2()
-h1.Sumw2()
-h1.SetStats(0)
-h1.Divide(hwoE)
-h3.Divide(hwoE)
-h1.GetXaxis().SetTitle(title)
-h1.GetXaxis().SetLabelSize(0.08)
-h1.GetYaxis().SetLabelSize(0.08)
-h1.GetYaxis().SetTitle("Obs./Exp.")
-h1.GetXaxis().SetNdivisions(505)
-h1.GetYaxis().SetNdivisions(5)
+    h1.GetXaxis().SetTitleSize(0.15)
+    h1.GetYaxis().SetTitleSize(0.15)
+    h1.GetYaxis().SetTitleOffset(0.56)
+    h1.GetXaxis().SetTitleOffset(1.04)
+    h1.GetXaxis().SetLabelSize(0.11)
+    h1.GetYaxis().SetLabelSize(0.11)
+    h1.GetXaxis().SetTitleFont(42)
+    h1.GetYaxis().SetTitleFont(42)
 
-h1.GetXaxis().SetTitleSize(0.15)
-h1.GetYaxis().SetTitleSize(0.15)
-h1.GetYaxis().SetTitleOffset(0.56)
-h1.GetXaxis().SetTitleOffset(1.04)
-h1.GetXaxis().SetLabelSize(0.11)
-h1.GetYaxis().SetLabelSize(0.11)
-h1.GetXaxis().SetTitleFont(42)
-h1.GetYaxis().SetTitleFont(42)
-
-h1.Draw("e0p")
-h3.Draw("e2same")
-
+    h1.Draw("e0p")
+    h3.Draw("e2same")
 c.cd()
 pad1.Draw()
-
 ROOT.gPad.RedrawAxis()
 
 c.Modified()
-c.SaveAs("Plotsemu/"+args.year+"inclusive/control_"+args.variable+".pdf")
-c.SaveAs("Plotsemu/"+args.year+"inclusive/control_"+args.variable+".png")
+if name=="inclusive":
+    c.SaveAs("Plotsemu/"+year+"inclusive/signal_"+variables+".pdf")
+    c.SaveAs("Plotsemu/"+year+"inclusive/signal_"+variables+".png")
+elif name=="exclusive0":
+    c.SaveAs("Plotsemu/"+year+"exclusive0/signal_"+variables+".pdf")
+    c.SaveAs("Plotsemu/"+year+"exclusive0/signal_"+variables+".png")
+elif name=="exclusive1":
+    c.SaveAs("Plotsemu/"+year+"exclusive1/signal_"+variables+".pdf")
+    c.SaveAs("Plotsemu/"+year+"exclusive1/signal_"+variables+".png")

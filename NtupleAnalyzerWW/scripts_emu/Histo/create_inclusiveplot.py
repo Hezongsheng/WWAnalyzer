@@ -4,13 +4,13 @@ import sys
 from math import cos, sin, sqrt, pi
 import ROOT
 import time as timer
-
+ROOT.EnableImplicitMT()
+year = sys.argv[1]
+#name = sys.argv[2]
+print("year is", year)
 
 time_start = timer.time()
-ROOT.EnableImplicitMT()
-
-year = sys.argv[1]
-histnamelist = ["mvis","ptemu","nTrk","elept","mupt","eleeta","mueta"]
+histnamelist = ["mvis","ptemu","nTrk","elept","mupt","eleeta","mueta", "Acopl"]
 MClist = ["VV","top","DYemu"]
 fdataSS = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_MuonEG.root".format(year),"read")
 fout = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_fake.root".format(year),"recreate")
@@ -23,5 +23,3 @@ for histname in histnamelist:
         hBKGSS = h_tmp
     fout.cd()
     hBKGSS.Write()
-
-
