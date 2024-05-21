@@ -16,22 +16,25 @@ if name=="inclusive":
 elif "exclusive" in name:
     df = RDataFrame("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample))
     
-if "MuonEG" in sample:
+if sample=="data":
     df = df.Define("allweight","FRweight")
 else:
-    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*FRweight")
+    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*FRweight")
 
 if name=="exclusive0":
-    df = df.Filter("isOS==0").Filter("nTrk==0")
+    df = df.Filter("nTrk==0")
 elif name=="exclusive1":
-    df = df.Filter("isOS==0").Filter("nTrk==1")
-h_mvis = df.Histo1D(("mvis","mvis",485,15,500),"mvis","allweight")
-h_ptemu = df.Histo1D(("ptemu","ptemu",285,15,300),"ptemu","allweight")
+    df = df.Filter("nTrk==1")
+df = df.Filter("!isOS")
+#if "exclusive" in name:
+#    df = df.Filter("ptemu>=40")
+h_mvis = df.Histo1D(("mvis","mvis",500,0,500),"mvis","allweight")
+h_ptemu = df.Histo1D(("ptemu","ptemu",300,0,300),"ptemu","allweight")
 h_nTrk = df.Histo1D(("nTrk","nTrk",100,0,100),"nTrk","allweight")
-h_elept = df.Histo1D(("elept","elept",100,20,120),"elept","allweight")
-h_mupt = df.Histo1D(("mupt","mupt",100,20,120),"mupt","allweight")
-h_eleeta = df.Histo1D(("eleeta","eleeta",52,-2.5,2.7),"eleeta","allweight")
-h_mueta = df.Histo1D(("mueta","mueta",52,-2.5,2.7),"mueta","allweight")
+h_elept = df.Histo1D(("elept","elept",120,0,120),"elept","allweight")
+h_mupt = df.Histo1D(("mupt","mupt",120,0,120),"mupt","allweight")
+h_eleeta = df.Histo1D(("eleeta","eleeta",50,-2.5,2.5),"eleeta","allweight")
+h_mueta = df.Histo1D(("mueta","mueta",50,-2.5,2.5),"mueta","allweight")
 h_Acopl = df.Histo1D(("Acopl","Acopl",100,0.0,1.0),"Acopl","allweight")
 Hlist = [h_mvis, h_ptemu, h_nTrk, h_elept, h_mupt, h_eleeta, h_mueta, h_Acopl]
 for h in Hlist:

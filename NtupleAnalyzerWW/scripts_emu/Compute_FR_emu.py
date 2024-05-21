@@ -72,11 +72,11 @@ df_DY = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/
 df_top = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/top.root".format(year))
 df_MC = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/MC.root".format(year))
 dflist = [df_data, df_VV, df_DY, df_top, df_MC]
-df_data = df_data.Define("allweight","1.0")
-df_VV = df_VV.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
-df_DY = df_DY.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
-df_top = df_top.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
-df_MC = df_MC.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
+df_data = df_data.Define("allweight","float(1)")
+df_VV = df_VV.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight")
+df_DY = df_DY.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight")
+df_top = df_top.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight")
+df_MC = df_MC.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight")
 '''
 for df in [df_VV, df_MC]:
     df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
@@ -91,10 +91,10 @@ def create_hist(df_f):
     return h_f
 
 def overflow2Dhist(h_FRweight):
-    for i in range (1,h_FRweight.GetNbinsY()+1):
+    for i in range (1,h_FRweight.GetNbinsX()+1):
         overflow_ptmu = h_FRweight.GetBinContent(i,h_FRweight.GetNbinsY()) + h_FRweight.GetBinContent(i,h_FRweight.GetNbinsY()+1)
         h_FRweight.SetBinContent(i,h_FRweight.GetNbinsY(),overflow_ptmu)
-    for i in range (1,h_FRweight.GetNbinsX()+1):
+    for i in range (1,h_FRweight.GetNbinsY()+1):
         overflow_pte = h_FRweight.GetBinContent(h_FRweight.GetNbinsX(),i) + h_FRweight.GetBinContent(h_FRweight.GetNbinsX()+1,i)
         h_FRweight.SetBinContent(h_FRweight.GetNbinsX(),i,overflow_pte)
     overflow_ptemu = h_FRweight.GetBinContent(h_FRweight.GetNbinsX(),h_FRweight.GetNbinsY()) + h_FRweight.GetBinContent(h_FRweight.GetNbinsX()+1,h_FRweight.GetNbinsY()+1)
@@ -130,8 +130,8 @@ def create_diff(hist1, hist2):
     return hist_diff
 
 def check_hist(hist_ratio):
-    for i in range(1, hist_ratio.GetNbinsX() + 3):
-        for j in range(1, hist_ratio.GetNbinsY() + 3):
+    for i in range(1, hist_ratio.GetNbinsX() + 2):
+        for j in range(1, hist_ratio.GetNbinsY() + 2):
             bin_content = hist_ratio.GetBinContent(i, j)
             print(i, j, bin_content)
 
@@ -162,60 +162,100 @@ c.SetRightMargin(0.15)
 df_OSnaData = df_data.Filter("isOS").Filter("eleiso").Filter("muantiiso")
 h_OSnaData = create_hist(df_OSnaData)
 h_OSnaData = overflow2Dhist(h_OSnaData)
+#print("OSnaData",h_OSnaData.GetBinContent(h_OSnaData.GetXaxis().FindBin(46),h_OSnaData.GetYaxis().FindBin(46)))
+#print("OsnaData overflow")
+#check_hist(h_OSnaData)
+
 df_OSnaMC = df_MC.Filter("isOS").Filter("eleiso").Filter("muantiiso")
 h_OSnaMC = create_hist(df_OSnaMC)
 #print("MC")
 #check_hist(h_OSnaMC)
 h_OSnaMC = overflow2Dhist(h_OSnaMC)
-#print("MC overflow")
+#print("OSnaMC",h_OSnaMC.GetBinContent(h_OSnaMC.GetXaxis().FindBin(46),h_OSnaMC.GetYaxis().FindBin(46)))
+#print("OSnaMC overflow")
 #check_hist(h_OSnaMC)
+
 df_OSnaVV = df_VV.Filter("isOS").Filter("eleiso").Filter("muantiiso")
 h_OSnaVV = create_hist(df_OSnaVV)
-#print("VV")
-#check_hist(h_OSnaVV)
+##check_hist(h_OSnaVV)
 h_OSnaVV = overflow2Dhist(h_OSnaVV)
-#print("VV overflow")
+#print("OSnaVV",h_OSnaVV.GetBinContent(h_OSnaVV.GetXaxis().FindBin(46),h_OSnaVV.GetYaxis().FindBin(46)))
+#print("OSnaVV overflow")
 #check_hist(h_OSnaVV)
 #h_OSnaData.Add(h_OSnaVV, -1)
+
 df_OSnatop = df_top.Filter("isOS").Filter("eleiso").Filter("muantiiso")
 h_OSnatop = create_hist(df_OSnatop)
 #print("top")
-#check_hist(h_OSnatop)
+##check_hist(h_OSnatop)
 h_OSnatop = overflow2Dhist(h_OSnatop)
-#print("top overflow")
+#print("OSnatop",h_OSnatop.GetBinContent(h_OSnatop.GetXaxis().FindBin(46),h_OSnatop.GetYaxis().FindBin(46)))
+#print("OSnatop overflow")
 #check_hist(h_OSnatop)
+
 #h_OSnaData.Add(h_OSnatop, -1)   
 df_OSnaDY = df_DY.Filter("isOS").Filter("eleiso").Filter("muantiiso")   
 h_OSnaDY = create_hist(df_OSnaDY)
 #print("DY")
-#check_hist(h_OSnaDY)
+##check_hist(h_OSnaDY)
 h_OSnaDY = overflow2Dhist(h_OSnaDY)
-#print("DY overflow")
+#print("OSnaDY",h_OSnaVV.GetBinContent(h_OSnaDY.GetXaxis().FindBin(46),h_OSnaDY.GetYaxis().FindBin(46)))
+#print("OSnaDY overflow")
 #check_hist(h_OSnaDY)
 #h_OSnaData.Add(h_OSnaDY, -1)
+
 #h_OSna = create_diff(h_OSnaData,h_OSnaMC)
 #h_OSnaData1 = create_diff(h_OSnaData, h_OSnaVV)
 #h_OSnaData2 = create_diff(h_OSnaData1, h_OSnatop)
 #h_OSnaData3  = create_diff(h_OSnaData2, h_OSnaDY)
 h_OSnaData = create_diff(h_OSnaData, h_OSnaMC)
 
+
+
+
+
+
+
+
+
+
 df_SSnaData = df_data.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
 h_SSnaData = create_hist(df_SSnaData)
 h_SSnaData = overflow2Dhist(h_SSnaData)
+#print("SSnaData",h_SSnaData.GetBinContent(h_SSnaData.GetXaxis().FindBin(46),h_SSnaData.GetYaxis().FindBin(46)))
+#print("SSnaData overflow")
+#check_hist(h_SSnaData)
+
 df_SSnaMC = df_MC.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
 h_SSnaMC = create_hist(df_SSnaMC)
 h_SSnaMC = overflow2Dhist(h_SSnaMC)
+#print("SSnaMC",h_SSnaMC.GetBinContent(h_SSnaMC.GetXaxis().FindBin(46),h_SSnaMC.GetYaxis().FindBin(46)))
+#print("SSnaMC overflow")
+#check_hist(h_SSnaMC)
+
 df_SSnaVV = df_VV.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
 h_SSnaVV = create_hist(df_SSnaVV)
 h_SSnaVV = overflow2Dhist(h_SSnaVV)
+#print("SSnaVV",h_SSnaVV.GetBinContent(h_SSnaVV.GetXaxis().FindBin(46),h_SSnaVV.GetYaxis().FindBin(46)))
+#print("SSnaVV overflow")
+#check_hist(h_SSnaVV)
 #h_SSnaData.Add(h_SSnaVV, -1)
+
 df_SSnatop = df_top.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
 h_SSnatop = create_hist(df_SSnatop)
 h_SSnatop = overflow2Dhist(h_SSnatop)
+#print("SSnatop",h_SSnaData.GetBinContent(h_SSnatop.GetXaxis().FindBin(46),h_SSnatop.GetYaxis().FindBin(46)))
+#print("SSnatop overflow")
+#check_hist(h_SSnatop)
 #h_SSnaData.Add(h_SSnatop, -1)
+
 df_SSnaDY = df_DY.Filter("!isOS").Filter("eleiso").Filter("muantiiso")
 h_SSnaDY = create_hist(df_SSnaDY)
 h_SSnaDY = overflow2Dhist(h_SSnaDY)
+#print("SSnaDY",h_SSnaDY.GetBinContent(h_SSnaDY.GetXaxis().FindBin(46),h_SSnaDY.GetYaxis().FindBin(46)))
+#print("SSnaDY overflow")
+#check_hist(h_SSnaDY)
+
 #h_SSnaData.Add(h_SSnaDY, -1)
 #h_SSna = create_diff(h_SSnaData,h_SSnaMC)
 #h_na = create_ratio(h_OSna,h_SSna)
@@ -235,7 +275,7 @@ h_na.SetMarkerColor(1)
 h_na.SetLineColor(1)
 h_na.GetXaxis().SetTitle("pt_{e}/GeV")
 h_na.GetYaxis().SetTitle("pt_{\mu}/GeV")
-h_na.GetZaxis().SetTitle("OS/SS")
+h_na.GetZaxis().SetTitle("OS/SS weight")
 h_na.Draw("zcol text")
 lumi=add_lumi(year)
 lumi.Draw("same")
@@ -304,7 +344,7 @@ h_antimuCor.SetMarkerColor(1)
 h_antimuCor.SetLineColor(1)
 h_antimuCor.GetXaxis().SetTitle("pt_{e}/GeV")
 h_antimuCor.GetYaxis().SetTitle("pt_{\mu}/GeV")
-h_antimuCor.GetZaxis().SetTitle("anto-#mu correction")
+h_antimuCor.GetZaxis().SetTitle("anti-#mu correction")
 h_antimuCor.Draw("zcol text")
 lumi=add_lumi(year)
 lumi.Draw("same")
@@ -319,5 +359,24 @@ c.Modified()
 c.SaveAs("antimuCor_"+year+".pdf")
 c.SaveAs("antimuCor_"+year+".png")
 
+h_mul = h_na 
+h_mul.Multiply(h_antimuCor)
+c.cd()
+h_mul.SetTitle("")
+h_mul.SetName("antimuCor")
+h_mul.SetMarkerStyle(20)
+h_mul.SetMarkerColor(1)
+h_mul.SetLineColor(1)
+h_mul.GetXaxis().SetTitle("pt_{e}/GeV")
+h_mul.GetYaxis().SetTitle("pt_{\mu}/GeV")
+h_mul.GetZaxis().SetTitle("multiplied")
+h_mul.Draw("zcol text")
+lumi=add_lumi(year)
+lumi.Draw("same")
+cms=add_CMS()
+cms.Draw("same")
 
-
+c.cd()
+c.Modified()
+c.SaveAs("mul_"+year+".pdf")
+c.SaveAs("mul_"+year+".png")

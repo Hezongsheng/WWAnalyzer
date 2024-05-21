@@ -155,13 +155,16 @@ elif (sample=="GGTT"):
 
 #elif (sample=="GGTT_Ctb20"):
 elif (sample=="GGToTauTau_Ctb20"):
-    xs = 1.121
-    eff= 0.0269
+    #xs = 1.121
+    xs = 1.048
+    #eff= 0.0269
+    eff = 0.0403
     weight=luminosity*xs/ngen*eff
 
 elif (sample=="GGToWW"):
     xs = 0.006561
-    eff = 0.368
+    #eff = 0.368
+    eff = 1.0
     weight = luminosity*xs/ngen*eff
 
 elif ("VV2L2Nu" in sample):
@@ -187,17 +190,21 @@ df_var = df_var.Define("my_ele","GetLepVector(eleindex,LepCand_pt,LepCand_eta,Le
     .Define("elept","my_ele.Pt()").Define("eleeta","my_ele.Eta()").Define("elephi","my_ele.Phi()").Define("eledz","LepCand_dz[eleindex]")\
     .Define("mupt","my_mu.Pt()").Define("mueta","my_mu.Eta()").Define("muphi","my_mu.Phi()").Define("mudz","LepCand_dz[muindex]")\
     .Define("isOS","GetisOS(LepCand_charge,eleindex,muindex)").Define("ptemu","(my_mu+my_ele).Pt()")
-
+#if name=="exclusive":
+#    df_var = df_var.Filter("ptemu>=40")
 
 df_sel = df_var.Filter("fabs(eleeta)<2.5 && fabs(mueta)<2.4").Filter("LepCand_muonMediumId[muindex]==1").Filter("my_ele.DeltaR(my_mu)>=0.5")
 if name=="exclusive" or name=="inclusive":
-    df_sel = df_sel.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==1").Define("FRweight","GetFRweight(my_ele.Pt(), my_mu.Pt(), \"{}\")".format(year))
+    df_sel = df_sel.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==1")
 elif name=="FR":
     df_sel = df_sel.Define("muiso","LepCand_muonIso[muindex]<0.20").Define("muantiiso","LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Define("eleiso","LepCand_eleMVAiso80[eleindex]==1").Define("eleantiiso","LepCand_eleMVAiso80[eleindex]==0 && LepCand_eleMVAisoL[eleindex]==1")
 
 
-#Add Trigger 
-df_sel = df_sel.Define("is_mu8ele23","(HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ) && (my_ele.Pt()>24) && (my_mu.Pt()>10)").Define("is_mu23ele12","(HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ) && (my_ele.Pt()>13) && (my_mu.Pt()>24)")
+#Add Trigger
+if year == "2016pre":
+    df_sel = df_sel.Define("is_mu8ele23","(HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL) && (my_ele.Pt()>24) && (my_mu.Pt()>10)").Define("is_mu23ele12","(HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL) && (my_ele.Pt()>13) && (my_mu.Pt()>24)")
+else: 
+    df_sel = df_sel.Define("is_mu8ele23","(HLT_Mu8_TrkIsoVVL_Ele23_CaloIdL_TrackIdL_IsoVL_DZ) && (my_ele.Pt()>24) && (my_mu.Pt()>10)").Define("is_mu23ele12","(HLT_Mu23_TrkIsoVVL_Ele12_CaloIdL_TrackIdL_IsoVL_DZ) && (my_ele.Pt()>13) && (my_mu.Pt()>24)")
 
 df_sel = df_sel.Filter("is_mu8ele23 || is_mu23ele12").Filter("my_ele.Pt()>15").Filter("my_mu.Pt()>15")
 
@@ -215,8 +222,7 @@ if (not isdata):
         .Define("eff_ele_trg24_zll","GetEffEleTrg24_Zll(my_ele,\"{}\")".format(year)).Define("eff_ele_trg12_zll","GetEffEleTrg12_Zll(my_ele,\"{}\")".format(year))\
         .Define("eff_mu_trg24_zll","GetEffMuTrg24_Zll(my_mu,\"{}\")".format(year)).Define("eff_mu_trg8_zll","GetEffMuTrg8_Zll(my_mu,\"{}\")".format(year))\
         .Define("trgsf","GetTrgSF(eff_ele_trg24_data, eff_ele_trg12_data, eff_mu_trg24_data, eff_mu_trg8_data, eff_ele_trg24_zll, eff_ele_trg12_zll, eff_mu_trg24_zll, eff_mu_trg8_zll, is_mu8ele23, is_mu23ele12)")
-    if (not isW):
-        df_sel = df_sel.Define("xsweight","{}*genWeight".format(weight)).Define("SFweight","GetSFweight_emu(murecosf, muisosf, muidsf, elerecosf, eleidsf, trgsf)")
+    df_sel = df_sel.Define("xsweight","{}*genWeight".format(weight)).Define("SFweight","GetSFweight_emu(murecosf, muisosf, muidsf, elerecosf, eleidsf, trgsf)")
 else:
     df_sel = df_sel.Define("murecosf","1.0").Define("murecosf_stat","1.0").Define("murecosf_syst","1.0")\
         .Define("mutrgsf","1.0").Define("mutrgsf_stat","1.0").Define("mutrgsf_syst","1.0")\
@@ -247,8 +253,10 @@ df_addvtx = df_sel.Define("zvtxll1","recovtxz1(eledz, mudz,PV_z)")\
 if (isdata):
     df = df_addvtx.Define("genAco","float(-99)").Define("Acoweight","float(1)").Define("puWeight","1.0").Define("puWeightUp","1.0").Define("puWeightDown","1.0")
 else:
-    if (category == "DY" or category == "VV"):
+    if category == "DY":
         df = df_addvtx.Define("genAco","GetGenAco(nGenCand, GenCand_phi, Acopl)").Define("Acoweight","Get_Aweight(genAco, nGenCand, GenCand_pt, elept, mupt, \"{}\")".format(year))
+    elif category == "VV":
+        df = df_addvtx.Define("genAco","GetGenAco(nGenCand, GenCand_phi, Acopl)").Define("Acoweight","float(1)")
     else:
         df = df_addvtx.Define("genAco","float(-99)").Define("Acoweight","float(1)")
 
@@ -276,7 +284,7 @@ df = df.Define("Trkcut","Track_ditaudz<0.05 && (!Track_elematch) && (!Track_muma
     .Define("Trk_phi","Track_phi[Trkcut]")\
     .Define("Trk_dz","Track_dz[Trkcut]")\
     .Define("Trk_ditaudz","Track_ditaudz[Trkcut]")
-
+df = df.Filter("nTrk<=100")
 
 #Apply nputrack correction
 print("Apply nputrack correctionz")
@@ -292,7 +300,7 @@ else:
 print("Apply nHStrack correctionz")
 if (isdata):
     df = df.Define("nHStrk","0")\
-        .Define("nHStrkweight","1.")
+        .Define("nHStrkweight","float(1)")
 else:
     if (category == "DY" or category == "VV"):
         df = df.Define("HStrkcut","Track_isMatchedToHS==1 && Trkcut==1")\
@@ -305,7 +313,18 @@ else:
 
 if name == "exclusive":
     df = df.Filter("nTrk<=2")
-    
+
+if ("GGToWW" in sample or "GGToTauTau" in sample):
+    df = df.Define("eeSF","GeteeSF(GenCand_pt, GenCand_eta, GenCand_phi, nTrk)")
+else:
+    df = df.Define("eeSF","float(1)")
+ 
+if name == "exclusive" or name == "inclusive":
+    df = df.Define("FRweight","Get_FRweight(elept, mupt, nTrk, \"{}\")".format(year))
+    #df = df.Define("FRweight","float(1)")
+
+
+
 uncertainties = ["","_CMS_pileup_yearDown","_CMS_pileup_yearUp","_CMS_emutrg_lowmuhighe_systDown","_CMS_emutrg_lowmuhighe_systUp","_CMS_emutrg_highmulowe_systDown","_CMS_emutrg_highmulowe_systUp","_CMS_emutrg_highmuhighe_systDown","_CMS_emutrg_highmuhighe_systUp","_CMS_elasticRescalingDown","_CMS_elasticRescalingUp","_CMS_L1PrefiringDown","_CMS_L1PrefiringUp","_CMS_muId_systDown","_CMS_muId_systUp","_CMS_muId_stat_yearDown","_CMS_muId_stat_yearUp","_CMS_muIso_systDown","_CMS_muIso_systUp","_CMS_muIso_stat_yearDown","_CMS_muIso_stat_yearUp","_CMS_elId_systDown","_CMS_elId_systUp","_CMS_ISRDown","_CMS_ISRUp","_CMS_FSRDown","_CMS_FSRUp","_CMS_PDFDown","_CMS_PDFUp","_CMS_muR0p5_muF0p5","_CMS_muRDown","_CMS_muFDown","_CMS_muFUp","_CMS_muRUp","_CMS_muR2p0_muF2p0"]
 
 for k in range(23):
@@ -359,7 +378,7 @@ for c in ("run","luminosityBlock","event","emuindex",\
     "puWeight","puWeightUp","puWeightDown",\
     "murecosf","murecosf_stat","murecosf_syst","muidsf","muidsf_stat","muidsf_syst","muisosf","muisosf_stat","muisosf_syst","mutrgsf","mutrgsf_stat","mutrgsf_syst","elerecosf","eleidsf","SFweight",\
     "nTrk","nPUtrk","nHStrk","nPUtrkweight","nHStrkweight",\
-    "L1PreFiringWeight_Nom","L1PreFiringWeight_Up","L1PreFiringWeight_Dn"
+    "L1PreFiringWeight_Nom","L1PreFiringWeight_Up","L1PreFiringWeight_Dn","eeSF"
 ):
     columns.push_back(c)
 if name=="FR":
@@ -373,73 +392,7 @@ if name=="exclusive" or name=="inclusive":
 if ("GGToTauTau" in sample):
     columns.push_back("TauG2Weights_ceBRe_0p0")
 
-'''
-def save_df_file(df_f, cat, file_f, columns_f):
-    df_o = df_f.Filter("elept>15 && elept<=24").Filter("mupt>24 && mupt<=35")
-    fout_o = ROOT.TFile(file_f+cat+"pte15to24_ptmu24to35.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte15to24_ptmu24to35.root",columns_f)
 
-    fout_o = ROOT.TFile(file_f+cat+"pte15to24_ptmu35to45.root","RECREATE")
-    df_o = df_f.Filter("elept>15 && elept<=24").Filter("mupt>35 && mupt<=45")
-    df_o.Snapshot("Events",file_f+cat+"pte15to24_ptmu35to45.root",columns_f)
-
-    fout_o = ROOT.TFile(file_f+cat+"pte15to24_ptmugt45.root","RECREATE")
-    df_o = df_f.Filter("elept>15 && elept<=24").Filter("mupt>45")
-    df_o.Snapshot("Events",file_f+cat+"pte15to24_ptmugt45.root",columns_f)
-
-
-
-    df_o = df_f.Filter("elept>24 && elept<=35").Filter("mupt>15 && mupt<=24")
-    fout_o = ROOT.TFile(file_f+cat+"pte24to35_ptmu15to24.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte24to35_ptmu15to24.root",columns_f)
-
-    df_o = df_f.Filter("elept>24 && elept<=35").Filter("mupt>24 && mupt<=35")
-    fout_o = ROOT.TFile(file_f+cat+"pte24to35_ptmu24to35.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte24to35_ptmu24to35.root",columns_f)
-
-    df_o = df_f.Filter("elept>24 && elept<=35").Filter("mupt>35 && mupt<=45")
-    fout_o = ROOT.TFile(file_f+cat+"pte24to35_ptmu35to45.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte24to35_ptmu35to45.root",columns_f)
-
-    df_o = df_f.Filter("elept>24 && elept<=35").Filter("mupt>45")
-    fout_o = ROOT.TFile(file_f+cat+"pte24to35_ptmugt45.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte24to35_ptmugt45.root",columns_f)
-    
-
-
-    df_o = df_f.Filter("elept>35 && elept<=45").Filter("mupt>15 && mupt<=24")
-    fout_o = ROOT.TFile(file_f+cat+"pte35to45_ptmu15to24.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte35to45_ptmu15to24.root",columns_f)
-
-    df_o = df_f.Filter("elept>35 && elept<=45").Filter("mupt>24 && mupt<=35")
-    fout_o = ROOT.TFile(file_f+cat+"pte35to45_ptmu24to35.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte35to45_ptmu24to35.root",columns_f)
-
-    df_o = df_f.Filter("elept>35 && elept<=45").Filter("mupt>35 && mupt<=45")
-    fout_o = ROOT.TFile(file_f+cat+"pte35to45_ptmu35to45.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte35to45_ptmu35to45.root",columns_f)
-
-    df_o = df_f.Filter("elept>35 && elept<=45").Filter("mupt>45")
-    fout_o = ROOT.TFile(file_f+cat+"pte35to45_ptmugt45.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"pte35to45_ptmugt45.root",columns_f)
-
-
-    df_o = df_f.Filter("elept>45").Filter("mupt>15 && mupt<=24")
-    fout_o = ROOT.TFile(file_f+cat+"ptegt45_ptmu15to24.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"ptegt45_ptmu15to24.root",columns_f)
-
-    df_o = df_f.Filter("elept>45").Filter("mupt>24 && mupt<=35")
-    fout_o = ROOT.TFile(file_f+cat+"ptegt45_ptmu24to35.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"ptegt45_ptmu24to35.root",columns_f)
-
-    df_o = df_f.Filter("elept>45").Filter("mupt>35 && mupt<=45")
-    fout_o = ROOT.TFile(file_f+cat+"ptegt45_ptmu35to45.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"ptegt45_ptmu35to45.root",columns_f)
-
-    df_o = df_f.Filter("elept>45").Filter("mupt>45")
-    fout_o = ROOT.TFile(file_f+cat+"ptegt45_ptmugt45.root","RECREATE")
-    df_o.Snapshot("Events",file_f+cat+"ptegt45_ptmugt45.root",columns_f)
-'''
 
 
 
@@ -453,26 +406,3 @@ elif name == "inclusive":
     df.Snapshot("Events","/eos/user/z/zohe/WWdata/inclusive/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
 elif name == "FR":
     df.Snapshot("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/{}.root".format(year, sample),columns)
-    '''
-    df_OS = df.Filter("isOS")
-    df_OSnn = df_OS.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==1")
-    df_OSna = df_OS.Filter("LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Filter("LepCand_eleMVAiso80[eleindex]==1")
-    df_OSan = df_OS.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==0")
-    df_OSaa = df_OS.Filter("LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Filter("LepCand_eleMVAiso80[eleindex]==0")
-
-    df_SS = df.Filter("!isOS")
-    df_SSnn = df_SS.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==1")
-    df_SSna = df_SS.Filter("LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Filter("LepCand_eleMVAiso80[eleindex]==1")
-    df_SSan = df_SS.Filter("LepCand_muonIso[muindex]<0.20").Filter("LepCand_eleMVAiso80[eleindex]==0")
-    df_SSaa = df_SS.Filter("LepCand_muonIso[muindex]>=0.20 && LepCand_muonIso[muindex]<0.50").Filter("LepCand_eleMVAiso80[eleindex]==0")
-
-    
-    save_df_file(df_OSnn, "OSnn_", fout, columns)
-    save_df_file(df_OSna, "OSna_", fout, columns)
-    save_df_file(df_OSan, "OSan_", fout, columns)
-    save_df_file(df_OSaa, "OSaa_", fout, columns)
-    save_df_file(df_SSnn, "SSnn_", fout, columns)
-    save_df_file(df_SSna, "SSna_", fout, columns)
-    save_df_file(df_SSan, "SSan_", fout, columns)
-    save_df_file(df_SSaa, "SSaa_", fout, columns)
-    '''

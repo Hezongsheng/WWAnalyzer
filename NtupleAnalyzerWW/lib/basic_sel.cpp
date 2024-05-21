@@ -115,7 +115,31 @@ map<string, musf> musfmap = {
 
 elesf::elesf(string year){
     yearconf = year;
-    if (year == "2018"){
+    if (year == "2016pre"){
+        TFile *f_recoAbove20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptAbove20.txt_EGM2D_UL2016preVFP.root","READ");
+        TFile *f_recoBelow20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptBelow20.txt_EGM2D_UL2016preVFP.root","READ");
+        TFile *f_eleID = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi.txt_Ele_wp80iso_preVFP_EGM2D.root","READ");
+        h_eleRecoeffAbove20 = (TH2F*)f_recoAbove20->Get("EGamma_SF2D");
+        h_eleRecoeffBelow20 = (TH2F*)f_recoBelow20->Get("EGamma_SF2D");
+        h_eleIDSF = (TH2F*)f_eleID->Get("EGamma_SF2D");
+    }
+    else if (year == "2016post"){
+        TFile *f_recoAbove20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptAbove20.txt_EGM2D_UL2016postVFP.root","READ");
+        TFile *f_recoBelow20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptBelow20.txt_EGM2D_UL2016postVFP.root","READ");
+        TFile *f_eleID = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi.txt_Ele_wp80iso_postVFP_EGM2D.root","READ");
+        h_eleRecoeffAbove20 = (TH2F*)f_recoAbove20->Get("EGamma_SF2D");
+        h_eleRecoeffBelow20 = (TH2F*)f_recoBelow20->Get("EGamma_SF2D");
+        h_eleIDSF = (TH2F*)f_eleID->Get("EGamma_SF2D");
+    }
+    else if (year == "2017"){
+        TFile *f_recoAbove20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptAbove20.txt_EGM2D_UL2017.root","READ");
+        TFile *f_recoBelow20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptBelow20.txt_EGM2D_UL2017.root","READ");
+        TFile *f_eleID = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi.txt_EGM2D_MVA80iso_UL17.root","READ");
+        h_eleRecoeffAbove20 = (TH2F*)f_recoAbove20->Get("EGamma_SF2D");
+        h_eleRecoeffBelow20 = (TH2F*)f_recoBelow20->Get("EGamma_SF2D");
+        h_eleIDSF = (TH2F*)f_eleID->Get("EGamma_SF2D");
+    }
+    else if (year == "2018"){
         TFile *f_recoAbove20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptAbove20.txt_EGM2D_UL2018.root","READ");
         TFile *f_recoBelow20 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi_ptBelow20.txt_EGM2D_UL2018.root","READ");
         TFile *f_eleID = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/egammaEffi.txt_Ele_wp80iso_EGM2D.root","READ");
@@ -133,16 +157,61 @@ elesf::elesf(){
 }
 
 
+elesf elesf2016pre("2016pre");
+elesf elesf2016post("2016post");
+elesf elesf2017("2017");
 elesf elesf2018("2018");
 
 map<string, elesf> elesfmap = {
-    {"2018", elesf2018}
+    {"2016pre", elesf2016pre}, {"2016post", elesf2016post}, {"2017", elesf2017}, {"2018", elesf2018}
 };
 
 
 trgsf::trgsf(string year){
     yearconf = year;
-    if (year == "2018"){
+    if (year == "2016pre"){
+        TFile *f_mu_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2016pre_HLTMu23Ele12.root","read");
+        TFile *f_mu_trg8 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2016pre_HLTMu8Ele23.root","read");
+        TFile *f_ele_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2016pre_HLTMu8Ele23.root","read");
+        TFile *f_ele_trg12 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2016pre_HLTMu23Ele12.root","read");
+        h_mu_trg24_data = (TH2F*) f_mu_trg24->Get("eff_data");
+        h_mu_trg24_zll = (TH2F*) f_mu_trg24->Get("eff_mc");
+        h_mu_trg8_data = (TH2F*) f_mu_trg8->Get("eff_data");
+        h_mu_trg8_zll = (TH2F*) f_mu_trg8->Get("eff_mc");
+        h_ele_trg24_data = (TH2F*) f_ele_trg24->Get("eff_data");
+        h_ele_trg24_zll = (TH2F*) f_ele_trg24->Get("eff_mc");
+        h_ele_trg12_data = (TH2F*) f_ele_trg12->Get("eff_data");
+        h_ele_trg12_zll = (TH2F*) f_ele_trg12->Get("eff_mc");
+    }
+    else if (year == "2016post"){
+        TFile *f_mu_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2016post_HLTMu23Ele12.root","read");
+        TFile *f_mu_trg8 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2016post_HLTMu8Ele23.root","read");
+        TFile *f_ele_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2016post_HLTMu8Ele23.root","read");
+        TFile *f_ele_trg12 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2016post_HLTMu23Ele12.root","read");
+        h_mu_trg24_data = (TH2F*) f_mu_trg24->Get("eff_data");
+        h_mu_trg24_zll = (TH2F*) f_mu_trg24->Get("eff_mc");
+        h_mu_trg8_data = (TH2F*) f_mu_trg8->Get("eff_data");
+        h_mu_trg8_zll = (TH2F*) f_mu_trg8->Get("eff_mc");
+        h_ele_trg24_data = (TH2F*) f_ele_trg24->Get("eff_data");
+        h_ele_trg24_zll = (TH2F*) f_ele_trg24->Get("eff_mc");
+        h_ele_trg12_data = (TH2F*) f_ele_trg12->Get("eff_data");
+        h_ele_trg12_zll = (TH2F*) f_ele_trg12->Get("eff_mc");
+    }
+    else if (year == "2017"){
+        TFile *f_mu_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2017_HLTMu23Ele12.root","read");
+        TFile *f_mu_trg8 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2017_HLTMu8Ele23.root","read");
+        TFile *f_ele_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2017_HLTMu8Ele23.root","read");
+        TFile *f_ele_trg12 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2017_HLTMu23Ele12.root","read");
+        h_mu_trg24_data = (TH2F*) f_mu_trg24->Get("eff_data");
+        h_mu_trg24_zll = (TH2F*) f_mu_trg24->Get("eff_mc");
+        h_mu_trg8_data = (TH2F*) f_mu_trg8->Get("eff_data");
+        h_mu_trg8_zll = (TH2F*) f_mu_trg8->Get("eff_mc");
+        h_ele_trg24_data = (TH2F*) f_ele_trg24->Get("eff_data");
+        h_ele_trg24_zll = (TH2F*) f_ele_trg24->Get("eff_mc");
+        h_ele_trg12_data = (TH2F*) f_ele_trg12->Get("eff_data");
+        h_ele_trg12_zll = (TH2F*) f_ele_trg12->Get("eff_mc");
+    }
+    else if (year == "2018"){
         TFile *f_mu_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2018_HLTMu23Ele12.root","read");
         TFile *f_mu_trg8 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_mu_2018_HLTMu8Ele23.root","read");
         TFile *f_ele_trg24 = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scalefactors/sf_el_2018_HLTMu8Ele23.root","read");
@@ -166,10 +235,14 @@ trgsf::trgsf(){
 }
 
 
+trgsf trgsf2016pre("2016pre");
+trgsf trgsf2016post("2016post");
+trgsf trgsf2017("2017");
 trgsf trgsf2018("2018");
 
+
 map<string, trgsf> trgsfmap = {
-    {"2018", trgsf2018}
+    {"2016pre", trgsf2016pre}, {"2016post", trgsf2016post}, {"2017", trgsf2017}, {"2018", trgsf2018}
 };
 
 
@@ -183,14 +256,17 @@ map<string, trgsf> trgsfmap = {
 
 Getxsw_W::Getxsw_W(string year){
     yearconf = year;
-    float luminosity = 59830.0;
-    if (year == "2017"){
+    float luminosity = 0.0;
+    if (year == "2018"){
+        luminosity = 59740.0;
+    }
+    else if (year == "2017"){
         luminosity = 41480.0;
     }
-    if (year == "2016pre"){
+    else if (year == "2016pre"){
         luminosity = 19520.0;
     }
-    if (year == "2016post"){
+    else if (year == "2016post"){
         luminosity = 16810.0;
     }
     cout << "year = " << year << " lumi = " << luminosity << endl; 
@@ -206,7 +282,7 @@ Getxsw_W xs_W2017("2017");
 Getxsw_W xs_W2018("2018");
 
 map<string, Getxsw_W> xsw_Wmap = {
-    {"2016pre", xs_W2016pre}, {"2016post", xs_W2016post},{"2017", xs_W2017},{"2018", xs_W2018}
+    {"2016pre", xs_W2016pre}, {"2016post", xs_W2016post}, {"2017", xs_W2017}, {"2018", xs_W2018}
 };
 
 
@@ -570,4 +646,23 @@ float recovtxz3(float lep1pt, float lep2pt, float lep1dz, float lep2dz, float PV
 }
 
 
-
+float GeteeSF(ROOT::VecOps::RVec<Float_t> &GenCand_pt, ROOT::VecOps::RVec<Float_t> &GenCand_eta, ROOT::VecOps::RVec<Float_t> &GenCand_phi, int nTrk){
+    float eeSF = 1.0;
+    float ditaumass = 0;
+    if (nTrk<=1){
+        TLorentzVector gen_lep1, gen_lep2;
+        gen_lep1.SetPtEtaPhiM(GenCand_pt[0],GenCand_eta[0],GenCand_phi[0],0);
+        gen_lep2.SetPtEtaPhiM(GenCand_pt[1],GenCand_eta[1],GenCand_phi[1],0);
+        ditaumass = (gen_lep1+gen_lep2).M();
+        if (nTrk==0){
+            eeSF = 2.02+0.00578 * ditaumass;
+        }
+        else{
+            eeSF = 2.11+0.00361 * ditaumass;
+        }
+    }
+    else {
+        eeSF = 1.0;
+    }
+    return eeSF;
+} 

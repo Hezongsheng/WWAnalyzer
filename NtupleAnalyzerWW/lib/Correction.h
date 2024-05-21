@@ -56,9 +56,13 @@ public:
     string yearconf;
     TH2D* OStoSS;
     TH2D* antimuCor;
+    TH1D* OStoSSCor;
+    TH1D* antimuCorCor;
     FR_weight();
     FR_weight(string year);
 };
 
-float GetFRweight(float elept, float mupt, string year);
+float Get_OStoSS(float elept, float mupt, string year);
+float Get_antimuCor(float elept, float mupt, string year);
+float Get_FRweight(float elept, float mupt, int nTrk, string year);
 #endif

@@ -135,6 +135,8 @@ float recovtxz2(TLorentzVector my_Lep1, TLorentzVector my_Lep2, float lep1dz, fl
 
 float recovtxz3(float lep1pt, float lep2pt, float lep1dz, float lep2dz, float PV_z);
 
+float GeteeSF(ROOT::VecOps::RVec<Float_t> &GenCand_pt, ROOT::VecOps::RVec<Float_t> &GenCand_eta, ROOT::VecOps::RVec<Float_t> &GenCand_phi, int nTrk);
+
 
 
 

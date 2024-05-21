@@ -62,7 +62,7 @@ mutauFR mutauFR2017("2017");
 mutauFR mutauFR2018("2018");
 
 map<string, mutauFR> mutauFRmap = {
-    {"2016pre", mutauFR2016pre}, {"2016post", mutauFR2016post},{"2017", mutauFR2017},{"2018", mutauFR2018}
+    {"2016pre", mutauFR2016pre}, {"2016post", mutauFR2016post}, {"2017", mutauFR2017}, {"2018", mutauFR2018}
 };
 
 

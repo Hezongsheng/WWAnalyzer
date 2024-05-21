@@ -227,11 +227,22 @@ float Get_ntHSweight(int ntracksHS, float gen_aco, string year){
 
 FR_weight::FR_weight(string year){
     yearconf = year;
-    if (year == "2018"){
+    if (year == "2017"){
+        TFile* f_FR = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FR_2017.root","read");
+        OStoSS = (TH2D*) f_FR->Get("OS-to-SS");
+        antimuCor = (TH2D*) f_FR->Get("antimuCor");
+        TFile* f_FRnTrk = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FRnTrk_2017.root","read");
+        OStoSSCor = (TH1D*) f_FRnTrk->Get("OS-to-SS_nTrkCor");
+        antimuCorCor = (TH1D*) f_FRnTrk->Get("anti-mu_nTrkCor");
+    }
+    else if (year == "2018"){
         TFile* f_FR = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FR_2018.root","read");
         OStoSS = (TH2D*) f_FR->Get("OS-to-SS");
         antimuCor = (TH2D*) f_FR->Get("antimuCor");
-    } 
+        TFile* f_FRnTrk = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FRnTrk_2018.root","read");
+        OStoSSCor = (TH1D*) f_FRnTrk->Get("OS-to-SS_nTrkCor");
+        antimuCorCor = (TH1D*) f_FRnTrk->Get("anti-mu_nTrkCor");
+    }
     else{
         cout<<"wrong year configuration"<<endl;
     }
@@ -240,18 +251,46 @@ FR_weight::FR_weight(string year){
 FR_weight::FR_weight(){
     
 }
+
+FR_weight FR_weight2017("2017");
 FR_weight FR_weight2018("2018");
 map<string, FR_weight> FR_weightmap = {
-    {"2018", FR_weight2018}
+    {"2017", FR_weight2017}, {"2018", FR_weight2018}
 };  
 
-float GetFRweight(float elept, float mupt, string year){
-    float FR_weight = 1.0;
-    if (elept > 55) elept = 50;
-    if (mupt > 55) mupt = 50;
-    FR_weight = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt))*FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt));
-    return FR_weight;
+float Get_OStoSS(float elept, float mupt, string year){
+    float OStoSS = 1.0;
+    float elept_u = elept;
+    float mupt_u = mupt;
+    if (elept_u > 55) elept_u = 50;
+    if (mupt_u > 55) mupt_u = 50;
+    OStoSS = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept_u),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt_u));
+    return OStoSS;
 }
+
+float Get_antimuCor(float elept, float mupt, string year){
+    float antimuCor = 1.0;
+    float elept_u = elept;
+    float mupt_u = mupt;
+    if (elept_u > 55) elept_u = 50;
+    if (mupt_u > 55) mupt_u = 50;
+    antimuCor = FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept_u),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt_u));
+    return antimuCor;
+}
+
+
+float Get_FRweight(float elept, float mupt, int nTrk, string year){
+    float FRweight = 1.0;
+    float elept_u = elept;
+    float mupt_u = mupt;
+    if (elept_u > 55) elept_u = 50;
+    if (mupt_u > 55) mupt_u = 50;
+    FRweight = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept_u),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt_u)) * FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept_u),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt_u)) * FR_weightmap[year].OStoSSCor->GetBinContent(FR_weightmap[year].OStoSSCor->FindBin(nTrk)) * FR_weightmap[year].antimuCorCor->GetBinContent(FR_weightmap[year].antimuCorCor->FindBin(nTrk));
+    
+    return FRweight;
+}
+
+
 
 
 
