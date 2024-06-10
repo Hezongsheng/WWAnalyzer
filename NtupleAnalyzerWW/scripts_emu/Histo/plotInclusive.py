@@ -24,6 +24,7 @@ def add_lumi(year):
     lowX=0.55
     lowY=0.835
     if (year=="2016pre" or year=="2016post"): lowX = 0.45
+    if (year=="run2"):lowX = 0.5
     lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.30, lowY+0.16, "NDC")
     lumi.SetBorderSize(   0 )
     lumi.SetFillStyle(    0 )
@@ -36,6 +37,7 @@ def add_lumi(year):
     if (year=="2016post"): lumi.AddText("2016 postVFP, 16 fb^{-1} (13 TeV)")
     if (year=="2017"): lumi.AddText("2017, 41 fb^{-1} (13 TeV)")
     if (year=="2016"): lumi.AddText("2016, 36 fb^{-1} (13 TeV)")
+    if (year=="run2"): lumi.AddText("2016-2018, 137 fb^{-1} (13 TeV)")
     return lumi
 
 def add_nTrk(name):
@@ -50,6 +52,7 @@ def add_nTrk(name):
     lumi.SetTextFont (   42 )
     if (name=="exclusive0"): lumi.AddText("nTrk=0")
     elif (name=="exclusive1"): lumi.AddText("nTrk=1")
+    elif (name=="exclusive01"): lumi.AddText("nTrk<=1")
     return lumi
 
 
@@ -115,15 +118,19 @@ ROOT.gStyle.SetOptStat(0)
 mvis = variable("mvis","m_{vis}",int(22),np.array([0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,300,500],dtype=float))
 elept = variable("elept","e p_{T}",int(44),np.array([10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,84,88,92,96,100,105,110,115,120],dtype=float))
 mupt = variable("mupt","#mu p_{T}",int(44),np.array([10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,84,88,92,96,100,105,110,115,120],dtype=float))
-Aco = variable("Acopl","acoplanarity",int(50),np.arange(0,1.02,0.02,dtype=float))
-mtranse = variable("mtrans","m_{T}(#mu,MET)",int(36),np.arange(0,185,5,dtype=float))
+Aco = variable("Acopl","acoplanarity",int(20),np.arange(0,1.05,0.05,dtype=float))
+mumtrans = variable("mumtrans","m_{T}(#mu,MET)",int(36),np.arange(0,185,5,dtype=float))
+elemtrans = variable("elemtrans","m_{T}(e,MET)",int(36),np.arange(0,185,5,dtype=float))
 nTrk = variable("nTrk","N_{tracks}",int(50),np.arange(0,102,2,dtype=float))
-MET = variable("MET_pt","MET",int(19),np.array([0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,80,90,100,110,120],dtype=float))
-eleeta = variable("eleeta","e #eta", int(50), np.arange(-2.5,2.6,0.1,dtype=float))
-mueta = variable("mueta","#mu #eta", int(50), np.arange(-2.5,2.6,0.1,dtype=float))
-ptemu = variable("ptemu","pt_{e#mu}",int(36),np.arange(0,185,5,dtype=float))
+MET = variable("MET","MET",int(19),np.array([0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,80,90,100,110,120],dtype=float))
+eleeta = variable("eleeta","e #eta", int(25), np.arange(-2.5,2.7,0.2,dtype=float))
+mueta = variable("mueta","#mu #eta", int(25), np.arange(-2.5,2.7,0.2,dtype=float))
+#ptemu = variable("ptemu","pt_{e#mu}",int(36),np.arange(0,185,5,dtype=float))
+ptemu = variable("ptemu","pt_{e#mu}",int(14),np.arange(40,190,10,dtype=float))
+deta =  variable("deta","#Delta#eta(e,#mu)",int(50),np.arange(0,5.1,0.1,dtype=float))
 
-variablelist = [mvis,elept,mupt,Aco,mtranse,nTrk,MET,eleeta,mueta,ptemu]
+
+variablelist = [mvis,elept,mupt,Aco,nTrk,MET,eleeta,mueta,ptemu,deta, mumtrans, elemtrans]
 
 title="m_{vis}"
 for var in variablelist:
@@ -150,13 +157,13 @@ trans=ROOT.TColor(new_idx, adapt.GetRed(), adapt.GetGreen(),adapt.GetBlue(), "",
 Data=file.Get(args.channel).Get("data_obs")
 #W=file.Get(categories[i]).Get("W")
 TT=file.Get(args.channel).Get("TT")
-VV=file.Get(args.channel).Get("VV")
+ZTT=file.Get(args.channel).Get("ZTT")
 ZTT=file.Get(args.channel).Get("ZTT")
 ZLL = file.Get(args.channel).Get("ZLL")
 ST=file.Get(args.channel).Get("ST")
 #GGTT=file.Get(args.channel).Get("GGTT")
-VV.Add(ST.Clone())
-#VV.Add(W.Clone())
+ZTT.Add(ST.Clone())
+#ZTT.Add(W.Clone())
 Fake=file.Get(args.channel).Get("Fake")
 '''
 fData = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_data.root".format(year),"r")
@@ -171,12 +178,12 @@ for i in range(1, hData.GetNbinsX() + 1):
 
 
 
-fVV = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_VV.root".format(year),"r")
-hVV = ROOT.TH1D(fVV.Get(variables)) 
-VV = ROOT.TH1D("VV","new hist of VV",var_used.nbins,var_used.binning)
-for i in range(1, hVV.GetNbinsX() + 1):
-    new_bin_index = VV.FindBin(hVV.GetBinCenter(i))
-    VV.SetBinContent(new_bin_index, VV.GetBinContent(new_bin_index) + hVV.GetBinContent(i))
+fZTT = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_ZTT.root".format(year),"r")
+hZTT = ROOT.TH1D(fZTT.Get(variables)) 
+ZTT = ROOT.TH1D("ZTT","new hist of ZTT",var_used.nbins,var_used.binning)
+for i in range(1, hZTT.GetNbinsX() + 1):
+    new_bin_index = ZTT.FindBin(hZTT.GetBinCenter(i))
+    ZTT.SetBinContent(new_bin_index, ZTT.GetBinContent(new_bin_index) + hZTT.GetBinContent(i))
 
 fFake = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_fake.root".format(year),"r")
 hFake = ROOT.TH1D(fFake.Get(variables)) 
@@ -185,60 +192,60 @@ for i in range(1, hData.GetNbinsX() + 1):
     new_bin_index = Fake.FindBin(hFake.GetBinCenter(i))
     Fake.SetBinContent(new_bin_index, Fake.GetBinContent(new_bin_index) + hFake.GetBinContent(i))
 
-fDY = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_DY.root".format(year),"r")
-hDY = ROOT.TH1D(fDY.Get(variables))
-DY = ROOT.TH1D("DY","new hist of DY",var_used.nbins,var_used.binning)
-for i in range(1, hDY.GetNbinsX() + 1):
-    new_bin_index = DY.FindBin(hDY.GetBinCenter(i))
-    DY.SetBinContent(new_bin_index, DY.GetBinContent(new_bin_index) + hDY.GetBinContent(i))
+fVV = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_VV.root".format(year),"r")
+hVV = ROOT.TH1D(fVV.Get(variables))
+VV = ROOT.TH1D("VV","new hist of VV",var_used.nbins,var_used.binning)
+for i in range(1, hVV.GetNbinsX() + 1):
+    new_bin_index = VV.FindBin(hVV.GetBinCenter(i))
+    VV.SetBinContent(new_bin_index, VV.GetBinContent(new_bin_index) + hVV.GetBinContent(i))
 
-ftop = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_top.root".format(year),"r")
-htop = ROOT.TH1D(ftop.Get(variables)) 
-top = ROOT.TH1D("top","new hist of top",var_used.nbins,var_used.binning)
-for i in range(1, htop.GetNbinsX() + 1):
-    new_bin_index = top.FindBin(hData.GetBinCenter(i))
-    top.SetBinContent(new_bin_index, top.GetBinContent(new_bin_index) + htop.GetBinContent(i))
+fTop = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_Top.root".format(year),"r")
+hTop = ROOT.TH1D(fTop.Get(variables)) 
+Top = ROOT.TH1D("Top","new hist of Top",var_used.nbins,var_used.binning)
+for i in range(1, hTop.GetNbinsX() + 1):
+    new_bin_index = Top.FindBin(hData.GetBinCenter(i))
+    Top.SetBinContent(new_bin_index, Top.GetBinContent(new_bin_index) + hTop.GetBinContent(i))
 
 if "exclusive" in name:
-    fGG2WW = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_GGToWW.root".format(year),"r")
-    hGG2WW = ROOT.TH1D(fGG2WW.Get(variables)) 
-    GG2WW = ROOT.TH1D("GG2WW","new hist of GG2WW",var_used.nbins,var_used.binning)
-    for i in range(1, hGG2WW.GetNbinsX() + 1):
-        new_bin_index = GG2WW.FindBin(hData.GetBinCenter(i))
-        GG2WW.SetBinContent(new_bin_index, GG2WW.GetBinContent(new_bin_index) + hGG2WW.GetBinContent(i))
+    fGGWW = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_GGWW.root".format(year),"r")
+    hGGWW = ROOT.TH1D(fGGWW.Get(variables)) 
+    GGWW = ROOT.TH1D("GGWW","new hist of GGWW",var_used.nbins,var_used.binning)
+    for i in range(1, hGGWW.GetNbinsX() + 1):
+        new_bin_index = GGWW.FindBin(hData.GetBinCenter(i))
+        GGWW.SetBinContent(new_bin_index, GGWW.GetBinContent(new_bin_index) + hGGWW.GetBinContent(i))
 
 
-    fGG2TauTau = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_GGToTauTau.root".format(year),"r")
-    hGG2TauTau = ROOT.TH1D(fGG2TauTau.Get(variables)) 
-    GG2TauTau = ROOT.TH1D("GG2TauTau","new hist of GG2TauTau",var_used.nbins,var_used.binning)
-    for i in range(1, hGG2TauTau.GetNbinsX() + 1):
-        new_bin_index = GG2TauTau.FindBin(hData.GetBinCenter(i))
-        GG2TauTau.SetBinContent(new_bin_index, GG2TauTau.GetBinContent(new_bin_index) + hGG2TauTau.GetBinContent(i))
-    nGG2WW = 0
-    for i in range(1,GG2WW.GetSize()+1):
-        nGG2WW += GG2WW.GetBinContent(i)
-    print("nGG2WW", nGG2WW/10)
-    nGG2TauTau = 0
-    for i in range(1,GG2TauTau.GetSize()+1):
-        nGG2TauTau += GG2TauTau.GetBinContent(i)
-    print("nGG2TauTau", nGG2TauTau/10)
-    nVV = 0
-    for i in range(1,VV.GetSize()+1):
-            nVV += VV.GetBinContent(i)
-    print("nVV", nVV)
+    fGGTT = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisOS/emu_{}_GGTT.root".format(year),"r")
+    hGGTT = ROOT.TH1D(fGGTT.Get(variables)) 
+    GGTT = ROOT.TH1D("GGTT","new hist of GGTT",var_used.nbins,var_used.binning)
+    for i in range(1, hGGTT.GetNbinsX() + 1):
+        new_bin_index = GGTT.FindBin(hData.GetBinCenter(i))
+        GGTT.SetBinContent(new_bin_index, GGTT.GetBinContent(new_bin_index) + hGGTT.GetBinContent(i))
+    nGGWW = 0
+    for i in range(1,GGWW.GetSize()+1):
+        nGGWW += GGWW.GetBinContent(i)
+    print("nGGWW", nGGWW/10)
+    nGGTT = 0
+    for i in range(1,GGTT.GetSize()+1):
+        nGGTT += GGTT.GetBinContent(i)
+    print("nGGTT", nGGTT/10)
+    nZTT = 0
+    for i in range(1,ZTT.GetSize()+1):
+            nZTT += ZTT.GetBinContent(i)
+    print("nZTT", nZTT)
     nFake = 0
     for i in range(1,Fake.GetSize()+1):
         nFake += Fake.GetBinContent(i)
     print("nFake", nFake)
-    nDY = 0
-    for i in range(1,DY.GetSize()+1):
-        nDY += DY.GetBinContent(i)
-    print("nDY", nDY)
-    ntop = 0
-    for i in range(1,top.GetSize()+1):
-        ntop += top.GetBinContent(i)
-    print("ntop", ntop) 
-    nBKG = nVV + nFake + nDY + ntop + nGG2TauTau/10
+    nVV = 0
+    for i in range(1,VV.GetSize()+1):
+        nVV += VV.GetBinContent(i)
+    print("nVV", nVV)
+    nTop = 0
+    for i in range(1,Top.GetSize()+1):
+        nTop += Top.GetBinContent(i)
+    print("nTop", nTop) 
+    nBKG = nZTT + nFake + nVV + nTop + nGGTT/10
     print("nBKG", nBKG)
 if name=="inclusive":
     Data.GetXaxis().SetTitle("")
@@ -273,6 +280,8 @@ elif variables=="eleeta" or variables=="mueta":
     Data.GetYaxis().SetTitle("Events/0.1")
 elif variables=="ptemu":
     Data.GetYaxis().SetTitle("Events/5GeV")
+elif variables=="deta":
+    Data.GetYaxis().SetTitle("Events/0.1")
 Data.SetMinimum(0.1)
 
 #blind
@@ -287,18 +296,18 @@ Data.SetMarkerSize(1)
 
 VV.SetFillColor(ROOT.TColor.GetColor("#f6cd61"))
 Fake.SetFillColor(ROOT.TColor.GetColor("#3da4ab"))
-DY.SetFillColor(ROOT.TColor.GetColor("#969df1"))
-top.SetFillColor(ROOT.TColor.GetColor("#4a4e4d"))
+ZTT.SetFillColor(ROOT.TColor.GetColor("#969df1"))
+Top.SetFillColor(ROOT.TColor.GetColor("#4a4e4d"))
 if "exclusive" in name:
-    GG2WW.SetFillColor(ROOT.TColor.GetColor("#ff0000"))
-    GG2TauTau.SetFillColor(ROOT.TColor.GetColor("#00ff00"))
+    GGWW.SetFillColor(ROOT.TColor.GetColor("#ff0000"))
+    GGTT.SetFillColor(ROOT.TColor.GetColor("#00ff00"))
 
 
 #ZTT.SetLineColor(1)
 VV.SetLineColor(1)
 Fake.SetLineColor(1)
-DY.SetLineColor(1)
-top.SetLineColor(1)
+ZTT.SetLineColor(1)
+Top.SetLineColor(1)
 Data.SetLineColor(1)
 Data.SetLineWidth(2)
 
@@ -307,12 +316,12 @@ Data.SetLineWidth(2)
 
 stack=ROOT.THStack("stack","stack")
 if "exclusive" in name:
-    stack.Add(GG2WW)
-    stack.Add(GG2TauTau)
+    stack.Add(GGWW)
+    stack.Add(GGTT)
 stack.Add(VV)
 stack.Add(Fake)
-stack.Add(DY)
-stack.Add(top)
+stack.Add(ZTT)
+stack.Add(Top)
 
     
 
@@ -321,11 +330,11 @@ stack.Add(top)
 
 errorBand = VV.Clone()
 if "exclusive" in name:
-    errorBand.Add(GG2WW)
-    errorBand.Add(GG2TauTau)
+    errorBand.Add(GGWW)
+    errorBand.Add(GGTT)
 errorBand.Add(Fake)
-errorBand.Add(DY)
-errorBand.Add(top)
+errorBand.Add(ZTT)
+errorBand.Add(Top)
 
 errorBand.SetMarkerSize(0)
 errorBand.SetFillColor(new_idx)
@@ -373,14 +382,14 @@ Data.Draw("esame")
 legende=make_legend()
 if name=="inclusive":
     legende.AddEntry(Data,"Observed","elp")
-    #legende.AddEntry(GG2WW,"Signal(GG#rightarrow WW)x1e3","f")
+    #legende.AddEntry(GGWW,"Signal(GG#rightarrow WW)x1e3","f")
 elif "exclusive" in name:
-    legende.AddEntry(GG2WW,"Signal(GG#rightarrow WW)x10","f")
-    legende.AddEntry(GG2TauTau,"GG#rightarrow #tau#taux10","f")
+    legende.AddEntry(GGWW,"Signal(GG#rightarrow WW)","f")
+    legende.AddEntry(GGTT,"GG#rightarrow #tau#tau","f")
 legende.AddEntry(VV,"VV","f")
 legende.AddEntry(Fake,"Fake","f")
-legende.AddEntry(DY,"Drell Yan","f")
-legende.AddEntry(top,"top","f")
+legende.AddEntry(ZTT,"Drell Yan","f")
+legende.AddEntry(Top,"Top","f")
 legende.AddEntry(errorBand,"Uncertainty","f")
 legende.Draw()
 
@@ -454,3 +463,6 @@ elif name=="exclusive0":
 elif name=="exclusive1":
     c.SaveAs("Plotsemu/"+year+"exclusive1/signal_"+variables+".pdf")
     c.SaveAs("Plotsemu/"+year+"exclusive1/signal_"+variables+".png")
+elif name=="exclusive01":
+    c.SaveAs("Plotsemu/"+year+"exclusive01/signal_"+variables+".pdf")
+    c.SaveAs("Plotsemu/"+year+"exclusive01/signal_"+variables+".png")

@@ -10,8 +10,8 @@ year = sys.argv[1]
 print("year is", year, "created fake bkg")
 
 time_start = timer.time()
-histnamelist = ["mvis","ptemu","nTrk","elept","mupt","eleeta","mueta", "Acopl"]
-MClist = ["VV","top","DY"]
+histnamelist = ["mvis","ptemu","nTrk","elept","mupt","eleeta","mueta", "Acopl", "MET", "deta", "mumtrans", "elemtrans"]
+MClist = ["VV","Top","ZTT"]
 fdataSS = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_data.root".format(year),"read")
 fout = ROOT.TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/Histo/mvisSS/emu_{}_fake.root".format(year),"recreate")
 for histname in histnamelist:

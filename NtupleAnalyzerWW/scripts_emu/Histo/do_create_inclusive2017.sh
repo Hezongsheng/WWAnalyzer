@@ -1,12 +1,15 @@
-python create_histOS.py 2017 DY inclusive
-python create_histOS.py 2017 top inclusive
+python create_histOS.py 2017 ZTT inclusive
+python create_histOS.py 2017 Top inclusive
 python create_histOS.py 2017 VV inclusive
 python create_histOS.py 2017 data inclusive
-python create_histSS.py 2017 DY inclusive
-python create_histSS.py 2017 top inclusive
+python create_histSS.py 2017 ZTT inclusive
+python create_histSS.py 2017 Top inclusive
 python create_histSS.py 2017 VV inclusive
 python create_histSS.py 2017 data inclusive
 python create_inclusiveplot.py 2017
+python plotInclusive.py 2017 MET inclusive
+python plotInclusive.py 2017 mumtrans inclusive
+python plotInclusive.py 2017 elemtrans inclusive
 python plotInclusive.py 2017 mvis inclusive
 python plotInclusive.py 2017 nTrk inclusive
 python plotInclusive.py 2017 elept inclusive

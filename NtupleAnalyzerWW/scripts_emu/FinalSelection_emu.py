@@ -242,7 +242,6 @@ df_sel = df_var
 
 
 
-
 #Define vtx with 3 definition (simple average, theta-average, pt-average),dzemu<0.1
 df_addvtx = df_sel.Define("zvtxll1","recovtxz1(eledz, mudz,PV_z)")\
     .Define("zvtxll2","recovtxz2(my_ele, my_mu, eledz, mudz, PV_z)")\
@@ -259,6 +258,12 @@ else:
         df = df_addvtx.Define("genAco","GetGenAco(nGenCand, GenCand_phi, Acopl)").Define("Acoweight","float(1)")
     else:
         df = df_addvtx.Define("genAco","float(-99)").Define("Acoweight","float(1)")
+
+#Calculate the top pt corretion
+if ("TT" in sample):
+    df = df.Define("ttindex","Get_ttindex(GenCand_id)").Define("topptweight","Get_topptCor(ttindex, GenCand_pt)").Define("topindex","ttindex[0]").Define("topbarindex","ttindex[1]")
+else:
+    df = df.Define("topptweight","float(1)")
 
 
 
@@ -284,7 +289,7 @@ df = df.Define("Trkcut","Track_ditaudz<0.05 && (!Track_elematch) && (!Track_muma
     .Define("Trk_phi","Track_phi[Trkcut]")\
     .Define("Trk_dz","Track_dz[Trkcut]")\
     .Define("Trk_ditaudz","Track_ditaudz[Trkcut]")
-df = df.Filter("nTrk<=100")
+#df = df.Filter("nTrk<=100")
 
 #Apply nputrack correction
 print("Apply nputrack correctionz")
@@ -378,8 +383,7 @@ for c in ("run","luminosityBlock","event","emuindex",\
     "puWeight","puWeightUp","puWeightDown",\
     "murecosf","murecosf_stat","murecosf_syst","muidsf","muidsf_stat","muidsf_syst","muisosf","muisosf_stat","muisosf_syst","mutrgsf","mutrgsf_stat","mutrgsf_syst","elerecosf","eleidsf","SFweight",\
     "nTrk","nPUtrk","nHStrk","nPUtrkweight","nHStrkweight",\
-    "L1PreFiringWeight_Nom","L1PreFiringWeight_Up","L1PreFiringWeight_Dn","eeSF"
-):
+    "L1PreFiringWeight_Nom","L1PreFiringWeight_Up","L1PreFiringWeight_Dn","eeSF", "topptweight"):
     columns.push_back(c)
 if name=="FR":
     columns.push_back("muiso")
@@ -391,7 +395,12 @@ if name=="exclusive" or name=="inclusive":
 
 if ("GGToTauTau" in sample):
     columns.push_back("TauG2Weights_ceBRe_0p0")
-
+'''
+if ("TT" in sample):
+    columns.push_back("ttindex")
+    columns.push_back("topindex")
+    columns.push_back("topbarindex")
+'''
 
 
 
@@ -404,5 +413,11 @@ if name == "exclusive":
     print("totally cost",time_end-time_start)
 elif name == "inclusive":
     df.Snapshot("Events","/eos/user/z/zohe/WWdata/inclusive/ntuples_emu_{}_basicsel/{}.root".format(year,sample),columns)
+    print("After selection entries", nentries)
+    time_end = timer.time()
+    print("totally cost",time_end-time_start)
 elif name == "FR":
     df.Snapshot("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/{}.root".format(year, sample),columns)
+    print("After selection entries", nentries)
+    time_end = timer.time()
+    print("totally cost",time_end-time_start)

@@ -7,7 +7,7 @@ import time as timer
 from array import array
 ROOT.EnableImplicitMT();
 year = sys.argv[1]
-print("year is", year)
+print("Computing the OS-to-SS, antimu correction and the multiplied for year", year)
 #sample = sys.argv[2]
 #print("year is", year, "sample is", sample)
 
@@ -73,10 +73,10 @@ df_top = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel
 df_MC = RDataFrame("Events","/eos/user/z/zohe/WWdata/FR/ntuples_emu_{}_basicsel/MC.root".format(year))
 dflist = [df_data, df_VV, df_DY, df_top, df_MC]
 df_data = df_data.Define("allweight","float(1)")
-df_VV = df_VV.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight")
-df_DY = df_DY.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight")
-df_top = df_top.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight")
-df_MC = df_MC.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight")
+df_VV = df_VV.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight")
+df_DY = df_DY.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight")
+df_top = df_top.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight")
+df_MC = df_MC.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight")
 '''
 for df in [df_VV, df_MC]:
     df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight")
@@ -266,6 +266,11 @@ h_SSnaData = create_diff(h_SSnaData, h_SSnaMC)
 h_na = h_OSnaData
 h_na.Divide(h_SSnaData)
 
+#set the negative value in OS-to-SS to 0
+for i in range(1,h_na.GetNbinsX()+1):
+    for j in range(1,h_na.GetNbinsY()+1):
+        if h_na.GetBinContent(i,j) < 0:
+            h_na.SetBinContent(i,j,0)
 
 c.cd()
 h_na.SetTitle("")

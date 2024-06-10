@@ -13,7 +13,7 @@ ROOT.gInterpreter.Declare('#include "Correction.h"')
 ROOT.gSystem.Load('/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/lib/RDFfunc.so')
 ROOT.EnableImplicitMT();
 year = sys.argv[1]
-print(" type year is", type(year))
+print("Computing FR nTrk correction for year", year)
 #sample = sys.argv[2]
 #print("year is", year, "sample is", sample)
 
@@ -124,5 +124,5 @@ h_antimuCor.Write()
 
 c.cd()
 c.Modified()
-c.SaveAs("anti-mu_nTrkCor_"+year+".pdf")
-c.SaveAs("anti-mu_nTrkCor_"+year+".png")
+c.SaveAs("antimuCor_nTrkCor_"+year+".pdf")
+c.SaveAs("antimuCor_nTrkCor_"+year+".png")

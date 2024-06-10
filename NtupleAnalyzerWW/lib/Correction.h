@@ -65,4 +65,7 @@ public:
 float Get_OStoSS(float elept, float mupt, string year);
 float Get_antimuCor(float elept, float mupt, string year);
 float Get_FRweight(float elept, float mupt, int nTrk, string year);
+
+ROOT::RVec<int> Get_ttindex(ROOT::VecOps::RVec<int> &GenCand_id);
+float Get_topptCor(ROOT::RVec<int> Get_ttindex, ROOT::RVec<float> GenCand_pt);
 #endif

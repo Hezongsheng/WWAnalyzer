@@ -7,7 +7,7 @@ hadd -f /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/data.root /eos/user/z/
 
 
 python ../FinalSelection_emu.py 2018 DYemu exclusive DY
-mv /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/DYemu.root /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/DY.root
+mv /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/DYemu.root /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ZTT.root
 
 
 
@@ -19,7 +19,7 @@ python ../FinalSelection_emu.py 2018 ST_t_antitop exclusive top
 python ../FinalSelection_emu.py 2018 ST_t_top exclusive top
 python ../FinalSelection_emu.py 2018 ST_tW_antitop exclusive top
 python ../FinalSelection_emu.py 2018 ST_tW_top exclusive top
-hadd -f /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/top.root    /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/TTToHadronic.root   /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/TTToSemiLeptonic.root   /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/TTTo2L2Nu.root  /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ST_t_antitop.root   /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ST_t_top.root   /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ST_tW_antitop.root  /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ST_tW_top.root
+hadd -f /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/Top.root    /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/TTToHadronic.root   /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/TTToSemiLeptonic.root   /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/TTTo2L2Nu.root  /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ST_t_antitop.root   /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ST_t_top.root   /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ST_tW_antitop.root  /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/ST_tW_top.root
 
 
 
@@ -32,7 +32,7 @@ hadd -f /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/VV.root /eos/user/z/zo
 
 python ../FinalSelection_emu.py 2018 GGToWW exclusive signal
 python ../FinalSelection_emu.py 2018 GGToTauTau_Ctb20 exclusive GG
-mv /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/GGToTauTau_Ctb20.root /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/GGToTauTau.root
+mv /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/GGToTauTau_Ctb20.root /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/GGTT.root
 
 #hadd -f /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/MC.root /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/DY.root /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/VV.root  /eos/user/z/zohe/WWdata/ntuples_emu_2018_basicsel/top.root
 

@@ -227,7 +227,23 @@ float Get_ntHSweight(int ntracksHS, float gen_aco, string year){
 
 FR_weight::FR_weight(string year){
     yearconf = year;
-    if (year == "2017"){
+    if (year == "2016pre"){
+        TFile* f_FR = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FR_2016pre.root","read");
+        OStoSS = (TH2D*) f_FR->Get("OS-to-SS");
+        antimuCor = (TH2D*) f_FR->Get("antimuCor");
+        TFile* f_FRnTrk = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FRnTrk_2016pre.root","read");
+        OStoSSCor = (TH1D*) f_FRnTrk->Get("OS-to-SS_nTrkCor");
+        antimuCorCor = (TH1D*) f_FRnTrk->Get("anti-mu_nTrkCor");
+    }
+    else if (year == "2016post"){
+        TFile* f_FR = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FR_2016post.root","read");
+        OStoSS = (TH2D*) f_FR->Get("OS-to-SS");
+        antimuCor = (TH2D*) f_FR->Get("antimuCor");
+        TFile* f_FRnTrk = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FRnTrk_2016post.root","read");
+        OStoSSCor = (TH1D*) f_FRnTrk->Get("OS-to-SS_nTrkCor");
+        antimuCorCor = (TH1D*) f_FRnTrk->Get("anti-mu_nTrkCor");
+    }
+    else if (year == "2017"){
         TFile* f_FR = new TFile("/eos/user/z/zohe/WWAnalyzer/NtupleAnalyzerWW/scripts_emu/FR_2017.root","read");
         OStoSS = (TH2D*) f_FR->Get("OS-to-SS");
         antimuCor = (TH2D*) f_FR->Get("antimuCor");
@@ -252,10 +268,12 @@ FR_weight::FR_weight(){
     
 }
 
+FR_weight FR_weight2016pre("2016pre");
+FR_weight FR_weight2016post("2016post");
 FR_weight FR_weight2017("2017");
 FR_weight FR_weight2018("2018");
 map<string, FR_weight> FR_weightmap = {
-    {"2017", FR_weight2017}, {"2018", FR_weight2018}
+    {"2016pre", FR_weight2016pre}, {"2016post", FR_weight2016post},{"2017", FR_weight2017}, {"2018", FR_weight2018}
 };  
 
 float Get_OStoSS(float elept, float mupt, string year){
@@ -285,12 +303,32 @@ float Get_FRweight(float elept, float mupt, int nTrk, string year){
     float mupt_u = mupt;
     if (elept_u > 55) elept_u = 50;
     if (mupt_u > 55) mupt_u = 50;
-    FRweight = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept_u),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt_u)) * FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept_u),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt_u)) * FR_weightmap[year].OStoSSCor->GetBinContent(FR_weightmap[year].OStoSSCor->FindBin(nTrk)) * FR_weightmap[year].antimuCorCor->GetBinContent(FR_weightmap[year].antimuCorCor->FindBin(nTrk));
+    FRweight = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept_u),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt_u)) * FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept_u),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt_u));
+    //* FR_weightmap[year].OStoSSCor->GetBinContent(FR_weightmap[year].OStoSSCor->FindBin(nTrk)) * FR_weightmap[year].antimuCorCor->GetBinContent(FR_weightmap[year].antimuCorCor->FindBin(nTrk));
     
     return FRweight;
 }
 
 
+//For tt samples, get tt index
+ROOT::RVec<int> Get_ttindex(ROOT::VecOps::RVec<int> &GenCand_id){
+    int top_index = 0;
+    int topbar_index = 0;
+    //top id == 6, topbar id == -6. The minimum id corresponding to minimum lepton id 
+    top_index = std::distance(GenCand_id.begin(),find(GenCand_id.begin(),GenCand_id.end(),6));
+    topbar_index = std::distance(GenCand_id.begin(),find(GenCand_id.begin(),GenCand_id.end(),-6));
+    ROOT::RVec<int> ttindex = {top_index, topbar_index};
+    return ttindex;
+}
 
+float Get_topptCor(ROOT::RVec<int> Get_ttindex, ROOT::RVec<float> GenCand_pt){
+    float toppt = GenCand_pt[Get_ttindex[0]];
+    float topbarpt = GenCand_pt[Get_ttindex[1]];
+    if (toppt > 500) toppt = 500;
+    if (topbarpt > 500) topbarpt = 500;
+    float topptCor = 1.0; 
+    topptCor = TMath::Sqrt(TMath::Exp(0.0615 - 0.0005*toppt) * TMath::Exp(0.0615 - 0.0005*topbarpt));
+    return topptCor;
+}
 
 

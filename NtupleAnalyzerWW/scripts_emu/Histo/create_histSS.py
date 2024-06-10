@@ -15,16 +15,19 @@ if name=="inclusive":
     df = RDataFrame("Events","/eos/user/z/zohe/WWdata/inclusive/ntuples_emu_{}_basicsel/{}.root".format(year,sample))
 elif "exclusive" in name:
     df = RDataFrame("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample))
+df = df.Define("deta","abs(eleeta-mueta)")
     
 if sample=="data":
     df = df.Define("allweight","FRweight")
 else:
-    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*FRweight")
+    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight*FRweight")
 
 if name=="exclusive0":
     df = df.Filter("nTrk==0")
 elif name=="exclusive1":
     df = df.Filter("nTrk==1")
+elif name=="exclusive01":
+    df = df.Filter("nTrk<=1")
 df = df.Filter("!isOS")
 #if "exclusive" in name:
 #    df = df.Filter("ptemu>=40")
@@ -36,7 +39,11 @@ h_mupt = df.Histo1D(("mupt","mupt",120,0,120),"mupt","allweight")
 h_eleeta = df.Histo1D(("eleeta","eleeta",50,-2.5,2.5),"eleeta","allweight")
 h_mueta = df.Histo1D(("mueta","mueta",50,-2.5,2.5),"mueta","allweight")
 h_Acopl = df.Histo1D(("Acopl","Acopl",100,0.0,1.0),"Acopl","allweight")
-Hlist = [h_mvis, h_ptemu, h_nTrk, h_elept, h_mupt, h_eleeta, h_mueta, h_Acopl]
+h_MET = df.Histo1D(("MET","MET",120,0.0,120.0),"MET_pt","allweight")
+h_deta = df.Histo1D(("deta","deta",100,0.0,5.0),"deta","allweight")
+h_mumtrans = df.Histo1D(("mumtrans","mumtrans",180,0.0,180.0),"mumtrans","allweight")
+h_elemtrans = df.Histo1D(("elemtrans","elemtrans",180,0.0,180.0),"elemtrans","allweight")
+Hlist = [h_mvis, h_ptemu, h_nTrk, h_elept, h_mupt, h_eleeta, h_mueta, h_Acopl, h_deta]
 for h in Hlist:
     overflow = h.GetBinContent(h.GetNbinsX())+h.GetBinContent(h.GetNbinsX()+1)
     h.SetBinContent(h.GetNbinsX(), overflow)
@@ -51,3 +58,7 @@ h_mupt.Write()
 h_eleeta.Write()
 h_mueta.Write()
 h_Acopl.Write()
+h_MET.Write()
+h_deta.Write()
+h_mumtrans.Write()
+h_elemtrans.Write()

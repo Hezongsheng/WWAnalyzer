@@ -1,0 +1,20 @@
+python create_histOS.py 2016post ZTT inclusive
+python create_histOS.py 2016post Top inclusive
+python create_histOS.py 2016post VV inclusive
+python create_histOS.py 2016post data inclusive
+python create_histSS.py 2016post ZTT inclusive
+python create_histSS.py 2016post Top inclusive
+python create_histSS.py 2016post VV inclusive
+python create_histSS.py 2016post data inclusive
+python create_inclusiveplot.py 2016post
+python plotInclusive.py 2016post MET inclusive
+python plotInclusive.py 2016post mumtrans inclusive
+python plotInclusive.py 2016post elemtrans inclusive
+python plotInclusive.py 2016post mvis inclusive
+python plotInclusive.py 2016post nTrk inclusive
+python plotInclusive.py 2016post elept inclusive
+python plotInclusive.py 2016post mupt inclusive
+python plotInclusive.py 2016post eleeta inclusive
+python plotInclusive.py 2016post mueta inclusive
+python plotInclusive.py 2016post ptemu inclusive
+python plotInclusive.py 2016post Acopl inclusive

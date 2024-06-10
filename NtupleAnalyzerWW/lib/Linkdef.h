@@ -20,7 +20,7 @@
 //All functions
 #pragma link C++ function GetLepVector GetMuonrecoSF GetMuonrecoSF_stat GetMuonrecoSF_syst GetMuonIsoSF GetMuonIsoSF_stat GetMuonIsoSF_syst GetMuonIDSF GetMuonIDSF_stat GetMuonIDSF_syst GetMuonTriggerSF GetMuonTriggerSF_stat GetMuonTriggerSF_syst GetElerecoSF GetEleIDSF GetEffEleTrg24_Data GetEffEleTrg12_Data GetEffMuTrg24_Data GetEffMuTrg8_Data GetEffEleTrg24_Zll GetEffEleTrg12_Zll GetEffMuTrg24_Zll GetEffMuTrg8_Zll GetTrgSF GetSFweight_emu Getemuindex Getmumuindex GetisOS GetTransmass GetCollMass GetAcopl recovtxz1 recovtxz2 recovtxz3 GeteeSF;
 #pragma link C++ function Computedz_lep Computediffpt_lep ComputedeltaR_lep Compute_ditau Gettrkmatch Getntrkcut_emu Getntrkcut_mumu;
-#pragma link C++ function GetGenAco Get_Aweight Get_BScor_ditaudz Get_ntpuweight Get_ntHSweight Get_OStoSS Get_antimuCor Get_FRweight;
+#pragma link C++ function GetGenAco Get_Aweight Get_BScor_ditaudz Get_ntpuweight Get_ntHSweight Get_OStoSS Get_antimuCor Get_FRweight Get_ttindex Get_topptCor;
 #pragma link C++ function WriteHistToFileEMu; 
 
 
