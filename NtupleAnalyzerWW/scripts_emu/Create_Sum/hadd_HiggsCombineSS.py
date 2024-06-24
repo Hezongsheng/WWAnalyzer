@@ -15,16 +15,27 @@ ROOT.EnableImplicitMT();
 
 year = sys.argv[1]
 sample = sys.argv[2]
+name = sys.argv[3]
 print("year is", year, "sample is", sample)
 df = RDataFrame("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample))
-df = df.Filter("!isOS").Filter("nTrk<=1")
-df = df.Filter("ptemu>40")
+df = df.Filter("!isOS")
+if name=="nTrk0":
+    df = df.Filter("nTrk==0")
+    fout = ROOT.TFile("/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/h0SS_{}.root".format(year,sample),"recreate")
+elif name=="nTrk1":
+    df = df.Filter("nTrk==1")
+    fout = ROOT.TFile("/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/h1SS_{}.root".format(year,sample),"recreate")
+#df = df.Filter("ptemu>30")
 
 if sample=="data":
     df = df.Define("allweight","FRweight")
 else:
-    df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight*FRweight")
+    df = df.Define("allweight","xsweight*puWeightDown*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight*FRweight")
 
-h_pt = df.Histo1D(("ptemu","ptemu",14,40,180),"ptemu","allweight")
-fout = ROOT.TFile("/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/hSS_{}.root".format(year,sample),"recreate")
-h_pt.Write()
+h_ptemu = df.Histo1D(("ptemu","ptemu",18,0,180),"ptemu","allweight")
+Hlist = [h_ptemu]
+for h in Hlist:
+    overflow = h.GetBinContent(h.GetNbinsX())+h.GetBinContent(h.GetNbinsX()+1)
+    h.SetBinContent(h.GetNbinsX(), overflow)
+fout.cd()
+h_ptemu.Write()

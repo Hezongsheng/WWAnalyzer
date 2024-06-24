@@ -15,21 +15,32 @@ ROOT.EnableImplicitMT();
 
 year = sys.argv[1]
 sample = sys.argv[2]
+name = sys.argv[3]
 print("year is", year, "sample is", sample)
 df = RDataFrame("Events","/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/{}.root".format(year,sample))
-df = df.Filter("isOS").Filter("nTrk<=1")
-df = df.Filter("ptemu>40")
+df = df.Filter("isOS")
+if name == "nTrk0":
+    df = df.Filter("nTrk==0")
+    fout = ROOT.TFile("/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/h0_{}.root".format(year,sample),"recreate")
+elif name == "nTrk1":
+    df = df.Filter("nTrk==1")
+    fout = ROOT.TFile("/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/h1_{}.root".format(year,sample),"recreate")
+#df = df.Filter("ptemu>30")
 
 if sample=="data":
     df = df.Define("allweight","float(1)")
 else:
-    if "GGToWW" in sample:
-        df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*eeSF*topptweight")
-    elif "GGToTauTau" in sample:
-        df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*TauG2Weights_ceBRe_0p0*eeSF*topptweight")    
+    if sample == "GGWW":
+        df = df.Define("allweight","xsweight*puWeightDown*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*eeSF*topptweight")
+    elif sample == "GGTT":
+        df = df.Define("allweight","xsweight*puWeightDown*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*TauG2Weights_ceBRe_0p0*eeSF*topptweight")    
     else:
-        df = df.Define("allweight","xsweight*puWeight*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight")
+        df = df.Define("allweight","xsweight*puWeightDown*SFweight*L1PreFiringWeight_Nom*nPUtrkweight*nHStrkweight*Acoweight*topptweight")
 
-h_pt = df.Histo1D(("{}".format(sample),"ptemu",14,40,180),"ptemu","allweight")
-fout = ROOT.TFile("/eos/user/z/zohe/WWdata/ntuples_emu_{}_basicsel/h_{}.root".format(year,sample),"recreate")
-h_pt.Write()
+h_ptemu = df.Histo1D(("{}_puWeightDown".format(sample),"ptemu",18,0,180),"ptemu","allweight")
+Hlist = [h_ptemu]
+for h in Hlist:
+    overflow = h.GetBinContent(h.GetNbinsX())+h.GetBinContent(h.GetNbinsX()+1)
+    h.SetBinContent(h.GetNbinsX(), overflow)
+fout.cd()
+h_ptemu.Write()

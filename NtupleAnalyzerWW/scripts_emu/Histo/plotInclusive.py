@@ -25,12 +25,18 @@ def add_lumi(year):
     lowY=0.835
     if (year=="2016pre" or year=="2016post"): lowX = 0.45
     if (year=="run2"):lowX = 0.5
-    lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.30, lowY+0.16, "NDC")
+    if "inclusive" in name:
+        lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.30, lowY+0.16, "NDC")
+    elif "exclusive" in name:
+        lumi  = ROOT.TPaveText(lowX, lowY+0.02, lowX+0.30, lowY+0.12, "NDC")
     lumi.SetBorderSize(   0 )
     lumi.SetFillStyle(    0 )
     lumi.SetTextAlign(   12 )
     lumi.SetTextColor(    1 )
-    lumi.SetTextSize(0.06)
+    if "inclusive" in name:
+        lumi.SetTextSize(0.06)
+    elif "exclusive" in name:
+        lumi.SetTextSize(0.04)
     lumi.SetTextFont (   42 )
     if (year=="2018"): lumi.AddText("2018, 60 fb^{-1} (13 TeV)")
     if (year=="2016pre"): lumi.AddText("2016 preVFP, 19 fb^{-1} (13 TeV)")
@@ -43,12 +49,12 @@ def add_lumi(year):
 def add_nTrk(name):
     lowX=0.2
     lowY=0.835
-    lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.30, lowY+0.16, "NDC")
+    lumi  = ROOT.TPaveText(lowX, lowY+0.02, lowX+0.30, lowY+0.12, "NDC")
     lumi.SetBorderSize(   0 )
     lumi.SetFillStyle(    0 )
     lumi.SetTextAlign(   12 )
     lumi.SetTextColor(    1 )
-    lumi.SetTextSize(0.1)
+    lumi.SetTextSize(0.04)
     lumi.SetTextFont (   42 )
     if (name=="exclusive0"): lumi.AddText("nTrk=0")
     elif (name=="exclusive1"): lumi.AddText("nTrk=1")
@@ -60,9 +66,15 @@ def add_nTrk(name):
 def add_CMS():
     lowX=0.21
     lowY=0.70
-    lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.15, lowY+0.16, "NDC")
+    if "inclusive" in name:
+        lumi = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.15, lowY+0.16, "NDC")
+    elif "exclusive" in name:
+        lumi = ROOT.TPaveText(lowX, lowY+0.1, lowX+0.15, lowY+0.17, "NDC")
     lumi.SetTextFont(61)
-    lumi.SetTextSize(0.08)
+    if "inclusive" in name:
+        lumi.SetTextSize(0.08)
+    elif "exclusive" in name:
+        lumi.SetTextSize(0.05)
     lumi.SetBorderSize(   0 )
     lumi.SetFillStyle(    0 )
     lumi.SetTextAlign(   12 )
@@ -73,9 +85,13 @@ def add_CMS():
 def add_Preliminary():
     lowX=0.21
     lowY=0.63
-    lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.15, lowY+0.16, "NDC")
+    if "inclusive" in name:
+        lumi  = ROOT.TPaveText(lowX, lowY+0.06, lowX+0.15, lowY+0.16, "NDC")
+        lumi.SetTextSize(0.06)
+    elif "exclusive" in name:
+        lumi  = ROOT.TPaveText(lowX, lowY+0.12, lowX+0.15, lowY+0.19, "NDC")
+        lumi.SetTextSize(0.04)
     lumi.SetTextFont(52)
-    lumi.SetTextSize(0.06)
     lumi.SetBorderSize(   0 )
     lumi.SetFillStyle(    0 )
     lumi.SetTextAlign(   12 )
@@ -115,22 +131,22 @@ ROOT.gStyle.SetOptStat(0)
 
 
 
-mvis = variable("mvis","m_{vis}",int(22),np.array([0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,300,500],dtype=float))
-elept = variable("elept","e p_{T}",int(44),np.array([10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,84,88,92,96,100,105,110,115,120],dtype=float))
-mupt = variable("mupt","#mu p_{T}",int(44),np.array([10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,84,88,92,96,100,105,110,115,120],dtype=float))
-Aco = variable("Acopl","acoplanarity",int(20),np.arange(0,1.05,0.05,dtype=float))
-mumtrans = variable("mumtrans","m_{T}(#mu,MET)",int(36),np.arange(0,185,5,dtype=float))
-elemtrans = variable("elemtrans","m_{T}(e,MET)",int(36),np.arange(0,185,5,dtype=float))
+mvis = variable("mvis","m_{vis}(GeV)",int(22),np.array([0,10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200,300,500],dtype=float))
+elept = variable("elept","e p_{T}(GeV)",int(44),np.array([10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,84,88,92,96,100,105,110,115,120],dtype=float))
+mupt = variable("mupt","#mu p_{T}(GeV)",int(44),np.array([10,12,14,16,18,20,22,24,26,28,30,32,34,36,38,40,42,44,46,48,50,52,54,56,58,60,62,64,66,68,70,72,74,76,78,80,84,88,92,96,100,105,110,115,120],dtype=float))
+Acopl = variable("Acopl","acoplanarity",int(10),np.arange(0,1.1,0.1,dtype=float))
+mumtrans = variable("mumtrans","m_{T}(#mu,MET)(GeV)",int(36),np.arange(0,185,5,dtype=float))
+elemtrans = variable("elemtrans","m_{T}(e,MET)(GeV)",int(36),np.arange(0,185,5,dtype=float))
 nTrk = variable("nTrk","N_{tracks}",int(50),np.arange(0,102,2,dtype=float))
-MET = variable("MET","MET",int(19),np.array([0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,80,90,100,110,120],dtype=float))
+MET = variable("MET","MET(GeV)",int(19),np.array([0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,80,90,100,110,120],dtype=float))
 eleeta = variable("eleeta","e #eta", int(25), np.arange(-2.5,2.7,0.2,dtype=float))
 mueta = variable("mueta","#mu #eta", int(25), np.arange(-2.5,2.7,0.2,dtype=float))
 #ptemu = variable("ptemu","pt_{e#mu}",int(36),np.arange(0,185,5,dtype=float))
-ptemu = variable("ptemu","pt_{e#mu}",int(14),np.arange(40,190,10,dtype=float))
+ptemu = variable("ptemu","p_{Te#mu}(GeV)",int(36),np.arange(0,185,5,dtype=float))
 deta =  variable("deta","#Delta#eta(e,#mu)",int(50),np.arange(0,5.1,0.1,dtype=float))
 
 
-variablelist = [mvis,elept,mupt,Aco,nTrk,MET,eleeta,mueta,ptemu,deta, mumtrans, elemtrans]
+variablelist = [mvis,elept,mupt,Acopl,nTrk,MET,eleeta,mueta,ptemu,deta, mumtrans, elemtrans]
 
 title="m_{vis}"
 for var in variablelist:
@@ -224,29 +240,29 @@ if "exclusive" in name:
     nGGWW = 0
     for i in range(1,GGWW.GetSize()+1):
         nGGWW += GGWW.GetBinContent(i)
-    print("nGGWW", nGGWW/10)
+    #print("nGGWW", nGGWW/10)
     nGGTT = 0
     for i in range(1,GGTT.GetSize()+1):
         nGGTT += GGTT.GetBinContent(i)
-    print("nGGTT", nGGTT/10)
+    #print("nGGTT", nGGTT/10)
     nZTT = 0
     for i in range(1,ZTT.GetSize()+1):
             nZTT += ZTT.GetBinContent(i)
-    print("nZTT", nZTT)
+    #print("nZTT", nZTT)
     nFake = 0
     for i in range(1,Fake.GetSize()+1):
         nFake += Fake.GetBinContent(i)
-    print("nFake", nFake)
+    #print("nFake", nFake)
     nVV = 0
     for i in range(1,VV.GetSize()+1):
         nVV += VV.GetBinContent(i)
-    print("nVV", nVV)
+    #print("nVV", nVV)
     nTop = 0
     for i in range(1,Top.GetSize()+1):
         nTop += Top.GetBinContent(i)
-    print("nTop", nTop) 
+    #print("nTop", nTop) 
     nBKG = nZTT + nFake + nVV + nTop + nGGTT/10
-    print("nBKG", nBKG)
+    #print("nBKG", nBKG)
 if name=="inclusive":
     Data.GetXaxis().SetTitle("")
     Data.GetXaxis().SetTitleSize(0)
@@ -254,34 +270,70 @@ if name=="inclusive":
 elif "exclusive" in name:
     Data.GetXaxis().SetTitle(title)
     Data.GetXaxis().SetNdivisions(505)
-    Data.GetXaxis().SetTitleSize(0.075)
-    Data.GetXaxis().SetTitleOffset(0.6)
-    Data.GetXaxis().SetLabelSize(0.06)
+    Data.GetXaxis().SetTitleSize(0.05)
+    Data.GetXaxis().SetTitleOffset(1.1)
+    Data.GetXaxis().SetLabelSize(0.04)
     Data.GetXaxis().SetTitleFont(42)
 
 Data.GetYaxis().SetLabelFont(42)
 Data.GetYaxis().SetLabelOffset(0.01)
-Data.GetYaxis().SetLabelSize(0.06)
-Data.GetYaxis().SetTitleSize(0.075)
-Data.GetYaxis().SetTitleOffset(1.04)
+if "inclusive" in name:
+    Data.GetYaxis().SetLabelSize(0.06)
+    Data.GetYaxis().SetTitleSize(0.075)
+    Data.GetYaxis().SetTitleOffset(1.04)
+elif "exclusive" in name:
+    Data.GetYaxis().SetLabelSize(0.04)
+    Data.GetYaxis().SetTitleSize(0.05)
+    Data.GetYaxis().SetTitleOffset(1.5)
 Data.SetTitle("")
 
+
+#print(variables,type(variables))
+if variables=="ptemu":
+    #print("ptemu")
+    Data.GetYaxis().SetTitle("Events/5GeV")
+    #print("ptemu,ok")
+
 if variables=="mvis":
+    #print("mvis")
     Data.GetYaxis().SetTitle("Events/10GeV")
-elif variables=="elept" or variables=="mupt":
+    #print("mvis,ok")
+
+if variables=="elept" or variables=="mupt":
+    #print("pt")
     Data.GetYaxis().SetTitle("Events/2GeV")
-elif variables=="Aco":
-    Data.GetYaxis().SetTitle("Events/0.025")
-elif variables=="mtrans":
-    Data.GetYaxis().SetTitle("Events/5GeV")
-elif variables=="MET":
-    Data.GetYaxis().SetTitle("Events/5GeV")
-elif variables=="eleeta" or variables=="mueta":
+    #print("pt,ok")
+
+if variables=="Acopl":
+    #print("Acopl")
     Data.GetYaxis().SetTitle("Events/0.1")
-elif variables=="ptemu":
+    #print("Acopl,ok")
+
+if variables=="elemtrans" or variables=="mumtrans":
+    #print("mtrans")
     Data.GetYaxis().SetTitle("Events/5GeV")
-elif variables=="deta":
+    #print("mtrans,ok")
+
+if variables=="MET":
+    #print("MET")
+    Data.GetYaxis().SetTitle("Events/5GeV")
+    #print("MET,ok")
+
+if variables=="eleeta" or variables=="mueta":
+    #print("eta")
+    Data.GetYaxis().SetTitle("Events/0.2")
+    #print("eta,ok")
+
+if variables=="deta":
+    #print("deta")
     Data.GetYaxis().SetTitle("Events/0.1")
+    #print("deta,ok")
+
+if variables=="nTrk":
+    #print("nTrk")
+    Data.GetYaxis().SetTitle("Events/2")
+    #print("nTrk,ok")
+#Data.GetYaxis().SetTitle("Events/10GeV")
 Data.SetMinimum(0.1)
 
 #blind
@@ -341,9 +393,13 @@ errorBand.SetFillColor(new_idx)
 errorBand.SetFillStyle(3001)
 errorBand.SetLineWidth(1)
 
-pad1 = ROOT.TPad("pad1","pad1",0,0.35,1,1)
-#if "exclusive" in name:
-#    pad1.SetPad(0,0,1,1)
+
+
+
+if "exclusive" in name:
+    pad1 = ROOT.TPad("pad1","pad1",0,0,1,1)
+elif "inclusive" in name:
+    pad1 = ROOT.TPad("pad1","pad1",0,0.35,1,1)
 pad1.Draw()
 pad1.cd()
 pad1.SetFillColor(0)
@@ -353,9 +409,12 @@ pad1.SetTickx(1)
 pad1.SetTicky(1)
 pad1.SetLeftMargin(0.18)
 pad1.SetRightMargin(0.05)
-if name=="inclusive":
+if "inclusive" in name:
     pad1.SetTopMargin(0.122)
     pad1.SetBottomMargin(0.026)
+elif "exclusive" in name:
+    pad1.SetTopMargin(0.122)
+    pad1.SetBottomMargin(0.2)
 pad1.SetFrameFillStyle(0)
 pad1.SetFrameLineStyle(0)
 pad1.SetFrameBorderMode(0)

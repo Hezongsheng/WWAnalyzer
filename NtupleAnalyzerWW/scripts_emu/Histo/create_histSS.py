@@ -29,8 +29,10 @@ elif name=="exclusive1":
 elif name=="exclusive01":
     df = df.Filter("nTrk<=1")
 df = df.Filter("!isOS")
-#if "exclusive" in name:
-#    df = df.Filter("ptemu>=40")
+'''
+if "exclusive" in name:
+    df = df.Filter("ptemu>70")
+'''
 h_mvis = df.Histo1D(("mvis","mvis",500,0,500),"mvis","allweight")
 h_ptemu = df.Histo1D(("ptemu","ptemu",300,0,300),"ptemu","allweight")
 h_nTrk = df.Histo1D(("nTrk","nTrk",100,0,100),"nTrk","allweight")

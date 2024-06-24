@@ -303,8 +303,7 @@ float Get_FRweight(float elept, float mupt, int nTrk, string year){
     float mupt_u = mupt;
     if (elept_u > 55) elept_u = 50;
     if (mupt_u > 55) mupt_u = 50;
-    FRweight = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept_u),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt_u)) * FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept_u),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt_u));
-    //* FR_weightmap[year].OStoSSCor->GetBinContent(FR_weightmap[year].OStoSSCor->FindBin(nTrk)) * FR_weightmap[year].antimuCorCor->GetBinContent(FR_weightmap[year].antimuCorCor->FindBin(nTrk));
+    FRweight = FR_weightmap[year].OStoSS->GetBinContent(FR_weightmap[year].OStoSS->GetXaxis()->FindBin(elept_u),FR_weightmap[year].OStoSS->GetYaxis()->FindBin(mupt_u)) * FR_weightmap[year].antimuCor->GetBinContent(FR_weightmap[year].antimuCor->GetXaxis()->FindBin(elept_u),FR_weightmap[year].antimuCor->GetYaxis()->FindBin(mupt_u)) * FR_weightmap[year].OStoSSCor->GetBinContent(FR_weightmap[year].OStoSSCor->FindBin(nTrk)) * FR_weightmap[year].antimuCorCor->GetBinContent(FR_weightmap[year].antimuCorCor->FindBin(nTrk));
     
     return FRweight;
 }

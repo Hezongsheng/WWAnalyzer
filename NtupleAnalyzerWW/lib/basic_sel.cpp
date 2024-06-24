@@ -655,10 +655,10 @@ float GeteeSF(ROOT::VecOps::RVec<Float_t> &GenCand_pt, ROOT::VecOps::RVec<Float_
         gen_lep2.SetPtEtaPhiM(GenCand_pt[1],GenCand_eta[1],GenCand_phi[1],0);
         ditaumass = (gen_lep1+gen_lep2).M();
         if (nTrk==0){
-            eeSF = 2.02+0.00578 * ditaumass;
+            eeSF = 5.043;
         }
         else{
-            eeSF = 2.11+0.00361 * ditaumass;
+            eeSF = 5.807;
         }
     }
     else {
